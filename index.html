@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>国投泰康信托 · 智能问数 | AI统一入口</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #eef2f9 0%, #e0e8f2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+        }
+
+        /* 主卡片容器 */
+        .ai-container {
+            width: 1280px;
+            max-width: 100%;
+            height: 860px;
+            background: #ffffff;
+            border-radius: 40px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(0, 0, 0, 0.02);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            backdrop-filter: blur(0px);
+            transition: all 0.2s;
+        }
+
+        /* 头部 */
+        .header {
+            padding: 20px 32px;
+            background: white;
+            border-bottom: 1px solid #eef2f9;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #0b2f4e, #1a4a76);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 20px;
+        }
+        .brand h1 {
+            font-size: 1.6rem;
+            font-weight: 600;
+            color: #132b44;
+            letter-spacing: -0.3px;
+        }
+        .welcome-section {
+            text-align: right;
+        }
+        .greeting {
+            font-size: 0.85rem;
+            color: #6f8fae;
+        }
+        .user-name {
+            font-weight: 600;
+            color: #1e4870;
+            font-size: 0.95rem;
+        }
+
+        /* 模式切换栏 */
+        .mode-bar {
+            padding: 12px 32px 0 32px;
+            background: white;
+            border-bottom: 1px solid #edf2f9;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+        }
+        .mode-item {
+            padding: 8px 20px;
+            border-radius: 40px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            background: transparent;
+            color: #4f6f8f;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid transparent;
+        }
+        .mode-item i {
+            margin-right: 8px;
+            font-size: 0.8rem;
+        }
+        .mode-item.active {
+            background: #eef3fc;
+            color: #1e5a9c;
+            border-color: #cddff2;
+        }
+        .mode-item:hover:not(.active) {
+            background: #f5f9fe;
+            color: #2d628f;
+        }
+
+        /* 核心对话区 */
+        .conversation-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: #fbfdff;
+            overflow: hidden;
+        }
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 24px 32px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* 消息气泡 */
+        .message-row {
+            display: flex;
+            gap: 14px;
+            max-width: 85%;
+        }
+        .assistant-message {
+            align-self: flex-start;
+        }
+        .user-message {
+            align-self: flex-end;
+            flex-direction: row-reverse;
+        }
+        .avatar {
+            width: 36px;
+            height: 36px;
+            background: #eef2fc;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            color: #2b659b;
+            font-size: 18px;
+        }
+        .bubble {
+            background: white;
+            padding: 12px 18px;
+            border-radius: 22px;
+            font-size: 0.9rem;
+            line-height: 1.45;
+            color: #1e2f3f;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+            border: 1px solid #eef2f8;
+        }
+        .user-message .bubble {
+            background: #1a4e7a;
+            color: white;
+            border: none;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+        }
+        .assistant-message .bubble {
+            background: #ffffff;
+            border: 1px solid #e6edf6;
+        }
+        .typing-indicator {
+            display: flex;
+            gap: 6px;
+            padding: 12px 16px;
+            align-items: center;
+        }
+        .typing-indicator span {
+            width: 8px;
+            height: 8px;
+            background: #9ab3d0;
+            border-radius: 50%;
+            display: inline-block;
+            animation: pulse 1.2s infinite ease-in-out;
+        }
+        @keyframes pulse {
+            0%, 60%, 100% { transform: scale(1); opacity: 0.6; }
+            30% { transform: scale(1.2); opacity: 1; }
+        }
+
+        /* 输入区域 */
+        .input-panel {
+            background: white;
+            border-top: 1px solid #eef2f9;
+            padding: 18px 32px 24px;
+        }
+        .input-wrapper {
+            background: #f6fafd;
+            border-radius: 60px;
+            border: 1px solid #dee8f2;
+            display: flex;
+            align-items: center;
+            padding: 6px 6px 6px 24px;
+            transition: all 0.2s;
+        }
+        .input-wrapper:focus-within {
+            border-color: #8fb4db;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(26, 78, 122, 0.05);
+        }
+        .input-wrapper input {
+            flex: 1;
+            border: none;
+            background: transparent;
+            padding: 14px 0;
+            font-size: 0.9rem;
+            outline: none;
+            color: #1e2f3f;
+        }
+        .input-wrapper input::placeholder {
+            color: #9db9d4;
+        }
+        .actions {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+        .shortcut-hint {
+            font-size: 0.7rem;
+            color: #90a8c4;
+            margin-right: 8px;
+        }
+        .send-btn {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: #1a4e7a;
+            border: none;
+            color: white;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 1rem;
+        }
+        .send-btn:hover {
+            background: #0e3d62;
+            transform: scale(0.96);
+        }
+        .mode-tip {
+            margin-top: 12px;
+            font-size: 0.7rem;
+            color: #8aa9c9;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .history-link {
+            cursor: pointer;
+            color: #2b6a9e;
+            font-weight: 500;
+        }
+        .history-link i {
+            margin-right: 4px;
+        }
+
+        /* 滚动条 */
+        ::-webkit-scrollbar {
+            width: 5px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #eef2f8;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbdbe0;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+<div class="ai-container">
+    <!-- 头部 -->
+    <div class="header">
+        <div class="brand">
+            <div class="logo-icon"><i class="fas fa-chart-network"></i></div>
+            <h1>国投泰康信托</h1>
+        </div>
+        <div class="welcome-section">
+            <div class="greeting">下午好，勤劳的</div>
+            <div class="user-name"><i class="far fa-smile-wink"></i> 中电金信吴敏华</div>
+        </div>
+    </div>
+
+    <!-- 模式切换栏（仅文字替换：“数字员工”相关文案已改为“智能问数”） -->
+    <div class="mode-bar">
+        <div class="mode-item active" data-mode="chat"><i class="fas fa-comment-dots"></i> 聊天模式</div>
+        <div class="mode-item" data-mode="web"><i class="fas fa-globe"></i> 网页模式</div>
+        <div class="mode-item" data-mode="doc"><i class="fas fa-file-alt"></i> 文档模式</div>
+        <div class="mode-item" data-mode="ppt"><i class="fas fa-chalkboard"></i> PPT模式</div>
+        <div class="mode-item" data-mode="table"><i class="fas fa-table"></i> 表格模式</div>
+        <div class="mode-item" data-mode="product"><i class="fas fa-chart-line"></i> 产品模式</div>
+    </div>
+
+    <!-- 对话核心区：智能问数对话（原“数字员工”已统一改为“智能问数”） -->
+    <div class="conversation-area">
+        <div class="chat-messages" id="chatMessages">
+            <!-- 初始提示：将原“数字员工”替换为“智能问数” -->
+            <div class="message-row assistant-message">
+                <div class="avatar"><i class="fas fa-robot"></i></div>
+                <div class="bubble">
+                    ✨ 你好，我是<strong>智能问数</strong>助手。你可以向我咨询信托业务数据，例如：<br>
+                    📊 “本周过生日的客户” &nbsp;&nbsp; 📈 “持仓规模超过1000万的客户” <br>
+                    🥧 “风险等级分布” &nbsp;&nbsp; 🏆 “客户持仓总金额排名”<br>
+                    我会自动识别意图并返回表格、图表或明细。
+                </div>
+            </div>
+        </div>
+
+        <!-- 输入区 -->
+        <div class="input-panel">
+            <div class="input-wrapper">
+                <input type="text" id="questionInput" placeholder="Enter发送，Ctrl+Enter换行 | 试试问：本周生日客户有哪些？">
+                <div class="actions">
+                    <span class="shortcut-hint"><i class="far fa-keyboard"></i></span>
+                    <button class="send-btn" id="sendBtn"><i class="fas fa-paper-plane"></i></button>
+                </div>
+            </div>
+            <div class="mode-tip">
+                <span><i class="fas fa-microphone-alt"></i> 智能问数 · 支持多轮对话</span>
+                <span class="history-link" id="historyTrigger"><i class="fas fa-clock-rotate-left"></i> 查看历史会话</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ---------- 智能问数核心（保持原逻辑，仅修改文字话术中的“数字员工”为“智能问数”） ----------
+    function generateAnswer(question) {
+        const lower = question.toLowerCase();
+        if (lower.includes('本周过生日') || lower.includes('本周生日') || lower.includes('生日客户')) {
+            return {
+                type: 'table',
+                title: '🎂 本周过生日的客户列表',
+                columns: ['客户名称', '生日日期', '客户类型'],
+                rows: [
+                    ['陈敏', '2026-04-24', '自然人'],
+                    ['刘振国', '2026-04-25', '机构'],
+                    ['王雅君', '2026-04-27', '自然人'],
+                    ['赵司', '2026-04-28', '高净值']
+                ],
+                summary: '共4位客户本周过生日，已为您整理清单。'
+            };
+        }
+        if (lower.includes('持仓规模超过1000万') || lower.includes('持仓超过1000万') || lower.includes('高净值持仓')) {
+            return {
+                type: 'table',
+                title: '💰 持仓规模超过1000万的客户',
+                columns: ['客户名称', '持仓总规模(万元)', '产品数量'],
+                rows: [
+                    ['赵司', '1260', '4'],
+                    ['林德福', '1520', '5'],
+                    ['周裕华', '1100', '3']
+                ],
+                summary: '共3位客户持仓超千万，资产优质。'
+            };
+        }
+        if (lower.includes('风险等级分布') || lower.includes('风险分布') || lower.includes('客户风险')) {
+            return {
+                type: 'pie',
+                title: '📊 客户风险等级分布',
+                data: { 'C1保守型': 8, 'C2稳健型': 24, 'C3平衡型': 35, 'C4进取型': 28, 'C5激进型': 15 },
+                summary: 'C3及以上客户占比78%，风险偏好稳健偏进取。'
+            };
+        }
+        if (lower.includes('客户持仓总金额排名') || lower.includes('持仓金额排名') || lower.includes('top持仓')) {
+            return {
+                type: 'bar',
+                title: '🏆 客户持仓总金额排名 (万元)',
+                labels: ['赵司', '林德福', '周裕华', '陈国富', '孙立人'],
+                values: [1260, 1520, 1100, 980, 870],
+                summary: '林德福客户持仓总金额最高，建议关注高净值维护。'
+            };
+        }
+        if (lower.includes('赵司') && (lower.includes('总持仓') || lower.includes('固收') || lower.includes('权益'))) {
+            return {
+                type: 'text',
+                title: '📌 赵司持仓分析',
+                content: '✅ 赵司总持仓 ¥1,260 万，其中固收类 880 万 (69.8%)，权益类 380 万 (30.2%)。',
+                summary: '资产配置以固收为主，稳健风格。'
+            };
+        }
+        // 通用智能回复（文案微调，不涉及“数字员工”）
+        return {
+            type: 'text',
+            title: '🔍 智能问数分析',
+            content: `根据现有数据，您咨询的「${question}」相关指标如下：当前信托产品整体表现稳健，近三月年化收益中枢在3.8%~4.5%之间。如需更精确明细，请提供具体业务维度(如产品代码/客户ID)。`,
+            summary: '数据基于行业公开趋势模拟，仅供参考。'
+        };
+    }
+
+    // 渲染答案（完全保留原样，UI样式不变）
+    function renderAnswerToDOM(answer, container) {
+        container.innerHTML = ''; 
+
+        const titleDiv = document.createElement('div');
+        titleDiv.style.fontSize = '1rem';
+        titleDiv.style.fontWeight = '600';
+        titleDiv.style.marginBottom = '12px';
+        titleDiv.style.color = '#1f4870';
+        titleDiv.innerText = answer.title;
+        container.appendChild(titleDiv);
+
+        let contentWrapper = document.createElement('div');
+
+        if (answer.type === 'table') {
+            const table = document.createElement('table');
+            table.style.width = '100%';
+            table.style.borderCollapse = 'collapse';
+            table.style.fontSize = '0.8rem';
+            table.style.margin = '12px 0';
+            const thead = document.createElement('thead');
+            const headerRow = document.createElement('tr');
+            answer.columns.forEach(col => {
+                const th = document.createElement('th');
+                th.innerText = col;
+                th.style.padding = '8px 10px';
+                th.style.textAlign = 'left';
+                th.style.background = '#eef3fc';
+                th.style.borderBottom = '1px solid #dce5f0';
+                headerRow.appendChild(th);
+            });
+            thead.appendChild(headerRow);
+            table.appendChild(thead);
+            const tbody = document.createElement('tbody');
+            answer.rows.forEach(row => {
+                const tr = document.createElement('tr');
+                row.forEach(cell => {
+                    const td = document.createElement('td');
+                    td.innerText = cell;
+                    td.style.padding = '8px 10px';
+                    td.style.borderBottom = '1px solid #eef2f9';
+                    tr.appendChild(td);
+                });
+                tbody.appendChild(tr);
+            });
+            table.appendChild(tbody);
+            contentWrapper.appendChild(table);
+        } 
+        else if (answer.type === 'pie') {
+            const pieContainer = document.createElement('div');
+            const total = Object.values(answer.data).reduce((a,b) => a+b, 0);
+            let colors = ['#2f69b0', '#487fc7', '#6190cf', '#7da3db', '#9bb9e8', '#b6cdeb'];
+            let start = 0;
+            const gradientStops = [];
+            Object.entries(answer.data).forEach(([label, val], idx) => {
+                let percent = (val / total) * 100;
+                gradientStops.push(`${colors[idx % colors.length]} ${start}% ${start + percent}%`);
+                start += percent;
+            });
+            const pieStyle = `width:110px; height:110px; border-radius:50%; background:conic-gradient(${gradientStops.join(',')});`;
+            const legendHtml = Object.entries(answer.data).map(([k,v]) => `<div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;"><span style="display:inline-block; width:12px; height:12px; background:${colors.shift()}; border-radius:2px;"></span><span>${k}: ${v}人 (${((v/total)*100).toFixed(1)}%)</span></div>`).join('');
+            pieContainer.innerHTML = `<div style="display:flex; gap:24px; align-items:center; flex-wrap:wrap;"><div style="${pieStyle}"></div><div>${legendHtml}</div></div>`;
+            contentWrapper.appendChild(pieContainer);
+        } 
+        else if (answer.type === 'bar') {
+            const maxVal = Math.max(...answer.values);
+            const barHtml = `<div style="display:flex; gap:28px; flex-wrap:wrap; margin: 16px 0;">${answer.labels.map((l, i) => `
+                <div style="text-align:center; width:70px;">
+                    <div style="width:36px; margin:0 auto 8px; background:#2d62a5; border-radius:6px 6px 4px 4px; height:${Math.max(28, (answer.values[i]/maxVal)*70)}px;"></div>
+                    <div style="font-size:12px; font-weight:600;">${answer.values[i]}w</div>
+                    <div style="font-size:11px; color:#5a7596;">${l}</div>
+                </div>
+            `).join('')}</div>`;
+            contentWrapper.innerHTML = barHtml;
+        } 
+        else {
+            const textDiv = document.createElement('div');
+            textDiv.style.padding = '8px 0';
+            textDiv.style.lineHeight = '1.5';
+            textDiv.innerText = answer.content;
+            contentWrapper.appendChild(textDiv);
+        }
+
+        container.appendChild(contentWrapper);
+
+        const summaryDiv = document.createElement('div');
+        summaryDiv.style.fontSize = '0.7rem';
+        summaryDiv.style.color = '#7997b9';
+        summaryDiv.style.marginTop = '14px';
+        summaryDiv.style.borderTop = '1px solid #eef2f9';
+        summaryDiv.style.paddingTop = '10px';
+        summaryDiv.innerText = `📎 ${answer.summary}  |  智能问数 · 数据截止 ${new Date().toLocaleDateString()}`;
+        container.appendChild(summaryDiv);
+    }
+
+    function showTyping(container) {
+        const typingDiv = document.createElement('div');
+        typingDiv.className = 'typing-indicator';
+        typingDiv.innerHTML = '<span></span><span></span><span></span><span style="margin-left:6px; font-size:12px;">智能问数分析中...</span>';
+        container.appendChild(typingDiv);
+        return typingDiv;
+    }
+
+    function addUserMessage(question) {
+        const messagesDiv = document.getElementById('chatMessages');
+        const userMsgDiv = document.createElement('div');
+        userMsgDiv.className = 'message-row user-message';
+        userMsgDiv.innerHTML = `
+            <div class="avatar"><i class="fas fa-user-circle"></i></div>
+            <div class="bubble">${escapeHtml(question)}</div>
+        `;
+        messagesDiv.appendChild(userMsgDiv);
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        return messagesDiv;
+    }
+
+    async function addAssistantResponse(question) {
+        const messagesDiv = document.getElementById('chatMessages');
+        const assistantWrap = document.createElement('div');
+        assistantWrap.className = 'message-row assistant-message';
+        assistantWrap.innerHTML = `<div class="avatar"><i class="fas fa-brain"></i></div><div class="bubble" id="tempAssistantBubble"></div>`;
+        messagesDiv.appendChild(assistantWrap);
+        const bubbleDiv = assistantWrap.querySelector('.bubble');
+        const thinkingElem = showTyping(bubbleDiv);
+        
+        await new Promise(resolve => setTimeout(resolve, 580));
+        const answer = generateAnswer(question);
+        bubbleDiv.innerHTML = '';
+        const answerContainer = document.createElement('div');
+        answerContainer.style.width = '100%';
+        renderAnswerToDOM(answer, answerContainer);
+        bubbleDiv.appendChild(answerContainer);
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    }
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+
+    async function sendMessage() {
+        const input = document.getElementById('questionInput');
+        const question = input.value.trim();
+        if (!question) return;
+        addUserMessage(question);
+        input.value = '';
+        await addAssistantResponse(question);
+    }
+
+    // 模式切换（视觉演示，文字描述保持与“智能问数”统一）
+    let currentMode = 'chat';
+    const modeItems = document.querySelectorAll('.mode-item');
+    function setMode(mode) {
+        currentMode = mode;
+        modeItems.forEach(item => {
+            const itemMode = item.getAttribute('data-mode');
+            if (itemMode === mode) {
+                item.classList.add('active');
+            } else {
+                item.classList.remove('active');
+            }
+        });
+        const tipToast = document.createElement('div');
+        tipToast.innerText = `已切换至 ${mode} 模式，智能问数将优先以该方式呈现数据`;
+        tipToast.style.position = 'fixed';
+        tipToast.style.bottom = '90px';
+        tipToast.style.left = '50%';
+        tipToast.style.transform = 'translateX(-50%)';
+        tipToast.style.background = '#1e4870cc';
+        tipToast.style.color = 'white';
+        tipToast.style.padding = '6px 18px';
+        tipToast.style.borderRadius = '40px';
+        tipToast.style.fontSize = '12px';
+        tipToast.style.zIndex = '999';
+        tipToast.style.backdropFilter = 'blur(8px)';
+        document.body.appendChild(tipToast);
+        setTimeout(() => tipToast.remove(), 1600);
+    }
+
+    modeItems.forEach(item => {
+        item.addEventListener('click', () => {
+            const mode = item.getAttribute('data-mode');
+            if (mode) setMode(mode);
+        });
+    });
+
+    const historyTrigger = document.getElementById('historyTrigger');
+    if (historyTrigger) {
+        historyTrigger.addEventListener('click', () => {
+            const historyMock = [
+                "赵司的总持仓是多少？固收和权益占比？",
+                "查询本周过生日的客户",
+                "持仓规模超过1000万的客户",
+                "风险等级分布",
+                "客户持仓总金额排名"
+            ];
+            const msg = `📋 历史会话 (最近5条):\n${historyMock.map((q, idx) => `${idx+1}. ${q}`).join('\n')}`;
+            alert(msg);
+        });
+    }
+
+    const questionInput = document.getElementById('questionInput');
+    questionInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && !e.ctrlKey && !e.shiftKey) {
+            e.preventDefault();
+            sendMessage();
+        }
+    });
+
+    document.getElementById('sendBtn').addEventListener('click', sendMessage);
+    
+    const quickExamples = [
+        "查询本周过生日的客户",
+        "持仓规模超过1000万的客户",
+        "风险等级分布",
+        "客户持仓总金额排名"
+    ];
+    const msgContainer = document.getElementById('chatMessages');
+    msgContainer.addEventListener('dblclick', (e) => {
+        if (e.target.closest('.bubble')) return;
+        const randomIdx = Math.floor(Math.random() * quickExamples.length);
+        questionInput.value = quickExamples[randomIdx];
+        questionInput.focus();
+    });
+</script>
+</body>
+</html>
