@@ -1,0 +1,984 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>信托智数 · 智能问数 | 智能数据分析平台</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background: #eef2f8;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .dashboard {
+            width: 1600px;
+            max-width: 100%;
+            height: 960px;
+            background: #ffffff;
+            border-radius: 36px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            padding: 16px 28px;
+            background: white;
+            border-bottom: 1px solid #e2eaf5;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-shrink: 0;
+        }
+
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .company-logo {
+            width: 44px;
+            height: 44px;
+            background: linear-gradient(145deg, #0b2b44, #1a4a76);
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+        }
+        .company-logo svg {
+            width: 28px;
+            height: 28px;
+        }
+        .logo-text {
+            font-weight: 700;
+            font-size: 22px;
+            color: #152c42;
+            letter-spacing: -0.3px;
+        }
+        .avatar {
+            width: 44px;
+            height: 44px;
+            background: #2b5280;
+            border-radius: 50%;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23ffffff"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>');
+            background-size: 55%;
+            background-position: center 55%;
+            background-repeat: no-repeat;
+        }
+
+        .main-layout {
+            display: flex;
+            flex: 1;
+            min-height: 0;
+            background: #f9fbfe;
+            position: relative;
+        }
+
+        .history-panel {
+            width: 280px;
+            background: #ffffff;
+            border-right: 1px solid #dee6f0;
+            display: flex;
+            flex-direction: column;
+            transition: width 0.25s ease;
+            flex-shrink: 0;
+            overflow-x: hidden;
+            z-index: 5;
+        }
+
+        .history-panel.collapsed {
+            width: 0;
+            border-right: none;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .history-header {
+            padding: 20px 18px 12px;
+            font-weight: 600;
+            border-bottom: 1px solid #eaeff8;
+            color: #1e3d68;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .history-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 12px;
+        }
+
+        .history-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 14px;
+            margin-bottom: 8px;
+            background: #f5faff;
+            border-radius: 20px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.15s;
+            border: 1px solid transparent;
+        }
+
+        .history-item.active {
+            background: #e0edfc;
+            border-color: #2d62a5;
+            font-weight: 500;
+        }
+
+        .history-item i {
+            color: #3466a8;
+            width: 22px;
+        }
+
+        .history-toggle-float {
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 32px;
+            height: 64px;
+            background: white;
+            border: 1px solid #c7d6ec;
+            border-left: none;
+            border-radius: 0 24px 24px 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 20;
+            color: #2a5080;
+        }
+
+        .conversation-core {
+            flex: 2;
+            display: flex;
+            flex-direction: column;
+            background: #ffffff;
+            min-width: 0;
+            border-right: 1px solid #eef2f9;
+        }
+
+        .convo-header {
+            padding: 18px 28px 12px;
+            border-bottom: 1px solid #e7eef8;
+        }
+
+        .convo-header h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #152c42;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .message-flow {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px 28px;
+            display: flex;
+            flex-direction: column;
+            gap: 28px;
+        }
+
+        .user-message-wrapper {
+            align-self: flex-end;
+            max-width: 75%;
+            position: relative;
+        }
+
+        .user-message {
+            background: #1e3a6b;
+            color: white;
+            padding: 14px 22px;
+            border-radius: 28px 28px 8px 28px;
+            font-size: 15px;
+            position: relative;
+        }
+
+        .copy-question-icon {
+            position: absolute;
+            right: 12px;
+            bottom: -28px;
+            background: #eef3fc;
+            border-radius: 20px;
+            padding: 4px 10px;
+            font-size: 11px;
+            cursor: pointer;
+            color: #1e3a6b;
+            display: none;
+            align-items: center;
+            gap: 4px;
+            white-space: nowrap;
+        }
+
+        .user-message-wrapper:hover .copy-question-icon {
+            display: flex;
+        }
+
+        .bot-response {
+            background: #f9fcff;
+            border-radius: 28px;
+            padding: 20px;
+            border: 1px solid #e2ebf9;
+        }
+
+        .thinking-steps {
+            margin-bottom: 18px;
+            border-left: 3px solid #799cd2;
+            background: #f2f8ff;
+            border-radius: 18px;
+            overflow: hidden;
+        }
+
+        .step {
+            border-bottom: 1px dashed #b8ceec;
+        }
+
+        .step-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 18px;
+            background: #edf4fe;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            color: #1f4870;
+        }
+
+        .step-content {
+            padding: 16px 24px;
+            background: #f8fcff;
+            font-size: 14px;
+            border-top: 1px solid #dbe5f5;
+        }
+
+        .step.collapsed .step-content {
+            display: none;
+        }
+
+        .sql-code {
+            background: #1e2b41;
+            color: #d4e0f0;
+            padding: 14px;
+            border-radius: 16px;
+            font-family: monospace;
+            font-size: 13px;
+            overflow-x: auto;
+        }
+
+        .answer-text {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: #1c3a5c;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+            margin: 12px 0;
+        }
+
+        .data-table th, .data-table td {
+            padding: 10px 8px;
+            text-align: left;
+            border-bottom: 1px solid #e2eaf2;
+        }
+
+        .data-table th {
+            background: #eef3fc;
+        }
+
+        .bar-chart {
+            display: flex;
+            align-items: flex-end;
+            gap: 30px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+
+        .bar-item {
+            text-align: center;
+            width: 70px;
+        }
+
+        .bar {
+            width: 40px;
+            background: #2d62a5;
+            border-radius: 8px 8px 4px 4px;
+            margin: 0 auto 8px;
+        }
+
+        .feedback-actions {
+            display: flex;
+            justify-content: flex-start;
+            gap: 12px;
+            margin-top: 24px;
+            padding-top: 16px;
+            border-top: 1px solid #dee9f5;
+            flex-wrap: wrap;
+        }
+
+        .feedback-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: #4a6f96;
+            font-size: 13px;
+            cursor: pointer;
+            background: none;
+            border: none;
+            padding: 6px 14px;
+            border-radius: 40px;
+            transition: all 0.2s;
+        }
+
+        .feedback-item:hover {
+            background: #eef3fc;
+            color: #1e3a6b;
+        }
+
+        .input-area {
+            padding: 16px 28px 24px;
+            background: white;
+            border-top: 1px solid #e2eaf5;
+        }
+
+        .input-wrapper {
+            background: #f2f8ff;
+            border-radius: 60px;
+            padding: 4px 4px 4px 24px;
+            display: flex;
+            align-items: center;
+            border: 1px solid #c9daf5;
+        }
+
+        .input-wrapper input {
+            flex: 1;
+            border: none;
+            background: transparent;
+            padding: 14px 0;
+            outline: none;
+            font-size: 15px;
+        }
+
+        .input-wrapper button {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            border: none;
+            background: #1e3e70;
+            color: white;
+            cursor: pointer;
+        }
+
+        .quick-row {
+            margin-top: 12px;
+            display: flex;
+            gap: 16px;
+            font-size: 13px;
+            color: #3865a5;
+            cursor: pointer;
+            flex-wrap: wrap;
+        }
+
+        .quick-row span {
+            background: #f0f6fe;
+            padding: 6px 16px;
+            border-radius: 40px;
+        }
+
+        .prompt-lab {
+            width: 360px;
+            background: #fefefe;
+            display: flex;
+            flex-direction: column;
+            border-left: 1px solid #eef2f9;
+            overflow-y: auto;
+            flex-shrink: 0;
+        }
+
+        .lab-header {
+            padding: 18px 20px 12px;
+            border-bottom: 1px solid #e9eff6;
+        }
+
+        .search-box {
+            padding: 8px 16px;
+            border-bottom: 1px solid #eef2f8;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: white;
+        }
+
+        .search-box input {
+            flex: 1;
+            border: 1px solid #d0ddec;
+            border-radius: 30px;
+            padding: 8px 16px;
+            font-size: 13px;
+            outline: none;
+        }
+
+        .scene-multi-select {
+            padding: 12px 20px;
+            border-bottom: 1px solid #eef2f8;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .scene-tag {
+            background: #f0f4fa;
+            border: 1px solid #d4e0ec;
+            border-radius: 40px;
+            padding: 5px 14px;
+            font-size: 12px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .scene-tag.selected {
+            background: #1e3a6b;
+            color: white;
+            border-color: #1e3a6b;
+        }
+
+        .type-section {
+            margin-top: 12px;
+            border: 1px solid #e9eff6;
+            border-radius: 20px;
+            background: white;
+            overflow: hidden;
+        }
+
+        .type-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            background: #f8fafd;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .type-header.collapsed i {
+            transform: rotate(-90deg);
+        }
+
+        .type-content {
+            padding: 8px 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            max-height: 280px;
+            overflow-y: auto;
+        }
+
+        .type-header.collapsed + .type-content {
+            display: none;
+        }
+
+        .prompt-card {
+            background: #ffffff;
+            border: 1px solid #e2eaf2;
+            border-radius: 18px;
+            padding: 12px;
+            position: relative;
+            transition: all 0.2s;
+        }
+        .prompt-card:hover {
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        }
+
+        .prompt-term {
+            font-weight: 700;
+            color: #1a3f6e;
+            font-size: 14px;
+            margin-bottom: 6px;
+            padding-right: 70px;
+        }
+
+        .prompt-detail {
+            font-size: 11px;
+            color: #4a627a;
+            margin: 4px 0;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .prompt-detail span {
+            background: #f0f4fa;
+            padding: 2px 8px;
+            border-radius: 16px;
+        }
+
+        .card-actions {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .card-actions i {
+            cursor: pointer;
+            color: #7b95bb;
+            font-size: 14px;
+            transition: all 0.15s;
+        }
+        .card-actions i:hover {
+            color: #1e3a6b;
+            transform: scale(1.05);
+        }
+
+        .add-prompt-btn {
+            margin: 16px 20px 20px;
+            background: #edf4fe;
+            border: 1px dashed #96b2d4;
+            border-radius: 40px;
+            padding: 10px;
+            text-align: center;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        .add-prompt-btn:hover {
+            background: #e2edfe;
+            border-color: #2d62a5;
+        }
+
+        .empty-tip {
+            padding: 20px;
+            text-align: center;
+            color: #99aec9;
+            font-size: 13px;
+        }
+
+        .toast-msg {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1e3a6b;
+            color: white;
+            padding: 8px 20px;
+            border-radius: 40px;
+            font-size: 13px;
+            z-index: 1000;
+            animation: fadeOut 1.5s ease forwards;
+            pointer-events: none;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+        }
+        .modal-container {
+            background: white;
+            border-radius: 28px;
+            width: 420px;
+            max-width: 90%;
+            padding: 24px;
+            box-shadow: 0 20px 35px -10px rgba(0,0,0,0.2);
+        }
+        .modal-container h3 {
+            margin-bottom: 20px;
+            font-size: 1.3rem;
+        }
+        .modal-container label {
+            font-size: 13px;
+            font-weight: 500;
+            margin-bottom: 4px;
+            display: block;
+            color: #1e3d68;
+        }
+        .modal-container input, .modal-container select, .modal-container textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #cbddea;
+            border-radius: 14px;
+            font-size: 13px;
+            margin-bottom: 14px;
+            outline: none;
+        }
+        .modal-container input:focus, .modal-container select:focus, .modal-container textarea:focus {
+            border-color: #2d62a5;
+            box-shadow: 0 0 0 2px rgba(45,98,165,0.1);
+        }
+        .modal-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            margin-top: 8px;
+        }
+        .modal-buttons button {
+            padding: 8px 20px;
+            border-radius: 40px;
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+        }
+        .btn-primary {
+            background: #1e3a6b;
+            color: white;
+        }
+        .btn-secondary {
+            background: #eef2f8;
+            color: #2c577c;
+        }
+
+        @keyframes fadeOut {
+            0% { opacity: 1; }
+            70% { opacity: 1; }
+            100% { opacity: 0; visibility: hidden; }
+        }
+    </style>
+</head>
+<body>
+<div class="dashboard">
+    <div class="header">
+        <div class="logo-area">
+            <div class="company-logo">
+                <i class="fas fa-building-columns" style="color: white; font-size: 22px;"></i>
+            </div>
+            <span class="logo-text"></span>
+        </div>
+        <div class="avatar"></div>
+    </div>
+    <div class="main-layout">
+        <div class="history-panel collapsed" id="historyPanel">
+            <div class="history-header"><span><i class="fas fa-clock-rotate-left"></i> 历史会话</span></div>
+            <div class="history-list" id="historyList"></div>
+        </div>
+        <div class="history-toggle-float" id="historyToggleFloat"><i class="fas fa-chevron-right" id="floatIcon"></i></div>
+        <div class="conversation-core">
+            <div class="convo-header">
+                <h2><i class="fas fa-robot"></i> 智能问数</h2>
+            </div>
+            <div class="message-flow" id="messageFlow"></div>
+            <div class="input-area">
+                <div class="input-wrapper">
+                    <input type="text" id="questionInput" placeholder="例如：查询本周过生日的客户 / 客户持仓总金额排名...">
+                    <button id="sendBtn"><i class="fas fa-arrow-up"></i></button>
+                </div>
+                <div class="quick-row">
+                    <span id="quick1"><i class="fas fa-birthday-cake"></i> 本周生日</span>
+                    <span id="quick2"><i class="fas fa-chart-line"></i> 持仓超1000万</span>
+                    <span id="quick3"><i class="fas fa-chart-pie"></i> 风险分布</span>
+                    <span id="quick4"><i class="fas fa-ranking-star"></i> 持仓排名</span>
+                </div>
+            </div>
+        </div>
+        <div class="prompt-lab">
+            <div class="lab-header"><h3><i class="fas fa-database"></i> 提示词库</h3></div>
+            <div class="search-box"><i class="fas fa-search"></i><input type="text" id="promptSearch" placeholder="搜索术语/同义词"></div>
+            <div class="scene-multi-select" id="sceneMultiSelect"></div>
+            <div id="promptListContainer" style="flex:1; overflow-y: auto; padding: 0 16px 16px;"></div>
+            <div class="add-prompt-btn" id="addPromptBtn">+ 新增提示词</div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ======================= MOCK 数据区域 =======================
+    // 1. 提示词原始数据 (包含实体/指标/参数)
+    let promptsData = [
+        { id:1, type:"实体", term:"客户名称", synonyms:["客户姓名","委托人名称"], mapping:"cust_name", detail:"VARCHAR(100) 客户法定全称", scenes:["客户"] },
+        { id:2, type:"实体", term:"产品代码", synonyms:["项目编号"], mapping:"product_code", detail:"VARCHAR(50) 唯一标识", scenes:["产品","持仓"] },
+        { id:3, type:"指标", term:"风险等级", synonyms:["风险评级","风险级别"], mapping:"risk_level", detail:"ENUM C1-C5", scenes:["客户"] },
+        { id:4, type:"指标", term:"持仓规模", synonyms:["持仓金额","持有规模"], mapping:"holding_amount", detail:"DECIMAL(18,2)", scenes:["持仓"] },
+        { id:5, type:"指标", term:"总资产", synonyms:["AUM","资产总额"], mapping:"total_asset", detail:"DECIMAL(18,2)", scenes:["客户","持仓"] },
+        { id:6, type:"参数", term:"时间范围", synonyms:["最近","近N天"], mapping:"time_range", detail:"默认近30天", scenes:["客户","持仓","交易"] },
+        { id:7, type:"参数", term:"排序", synonyms:["排名","前N名"], mapping:"order_limit", detail:"支持LIMIT", scenes:["客户","持仓"] }
+    ];
+    
+    // 2. 历史会话记录 (mock)
+    let historyRecords = [
+        { q: "赵司的总持仓是多少？固收和权益占比？" },
+        { q: "查询本周过生日的客户" },
+        { q: "持仓规模超过1000万的客户" },
+        { q: "风险等级分布" },
+        { q: "客户持仓总金额排名" }
+    ];
+    
+    // 3. 选中场景 & UI状态
+    let selectedScenes = ["客户"];
+    let searchKeyword = "";
+    let collapsedState = { 实体: false, 指标: false, 参数: false };
+    let currentActive = "赵司的总持仓是多少？固收和权益占比？";   // 默认高亮第一项历史
+    
+    // 通用函数
+    function showToast(msg){ let div=document.createElement('div'); div.className='toast-msg'; div.innerText=msg; document.body.appendChild(div); setTimeout(()=>div.remove(),1500); }
+    function escapeHtml(s){ return String(s).replace(/[&<>]/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[m])); }
+    
+    // ========== 提示词 CRUD 模态框 ==========
+    function openPromptModal(promptData = null, callback) {
+        const isEdit = !!promptData;
+        const modalHtml = `
+            <div class="modal-overlay" id="modalOverlay">
+                <div class="modal-container">
+                    <h3>${isEdit ? '编辑提示词' : '新增提示词'}</h3>
+                    <label>归属场景</label><select id="modalScenes"><option ${!promptData || promptData.scenes.includes('客户')?'selected':''}>客户</option><option ${promptData && promptData.scenes.includes('持仓')?'selected':''}>持仓</option><option ${promptData && promptData.scenes.includes('交易')?'selected':''}>交易</option><option ${promptData && promptData.scenes.includes('产品')?'selected':''}>产品</option></select>
+                    <label>类型</label><select id="modalType"><option ${!promptData || promptData.type==='实体'?'selected':''}>实体</option><option ${promptData && promptData.type==='指标'?'selected':''}>指标</option><option ${promptData && promptData.type==='参数'?'selected':''}>参数</option></select>
+                    <label>标准词 *</label><input id="modalTerm" value="${escapeHtml(promptData ? promptData.term : '')}" placeholder="例: 客户名称">
+                    <label>同义词 (逗号分隔)</label><input id="modalSynonyms" value="${escapeHtml(promptData ? promptData.synonyms.join(',') : '')}" placeholder="例: 客户姓名,委托人名称">
+                    <label>映射字段</label><input id="modalMapping" value="${escapeHtml(promptData ? promptData.mapping : '')}" placeholder="例: cust_name">
+                    <label>数据口径</label><textarea id="modalDetail" rows="2" placeholder="详细描述">${escapeHtml(promptData ? promptData.detail : '')}</textarea>
+                    <div class="modal-buttons">
+                        <button class="btn-secondary" id="modalCancelBtn">取消</button>
+                        <button class="btn-primary" id="modalConfirmBtn">${isEdit ? '保存修改' : '创建'}</button>
+                    </div>
+                </div>
+            </div>
+        `;
+        document.body.insertAdjacentHTML('beforeend', modalHtml);
+        const overlay = document.getElementById('modalOverlay');
+        const confirmBtn = document.getElementById('modalConfirmBtn');
+        const cancelBtn = document.getElementById('modalCancelBtn');
+        const closeModal = () => overlay.remove();
+        confirmBtn.onclick = () => {
+            const term = document.getElementById('modalTerm').value.trim();
+            if (!term) { showToast("标准词不能为空"); return; }
+            const type = document.getElementById('modalType').value;
+            const synonymsRaw = document.getElementById('modalSynonyms').value;
+            const synonyms = synonymsRaw ? synonymsRaw.split(/[,，]+/).map(s=>s.trim()).filter(s=>s) : [];
+            const mapping = document.getElementById('modalMapping').value.trim() || "custom_field";
+            const detail = document.getElementById('modalDetail').value.trim() || "自定义提示词";
+            const scene = document.getElementById('modalScenes').value || "客户";
+            callback({ term, type, synonyms, mapping, detail, scenes: [scene] });
+            closeModal();
+        };
+        cancelBtn.onclick = closeModal;
+        overlay.addEventListener('click', (e) => { if(e.target === overlay) closeModal(); });
+    }
+
+    function addPrompt() {
+        openPromptModal(null, (newData) => {
+            const newId = Date.now();
+            promptsData.push({ id: newId, ...newData });
+            renderPrompts();
+            renderSceneSelect();
+            showToast("提示词已添加");
+        });
+    }
+    
+    function editPromptItem(prompt) {
+        openPromptModal(prompt, (updated) => {
+            prompt.term = updated.term;
+            prompt.type = updated.type;
+            prompt.synonyms = updated.synonyms;
+            prompt.mapping = updated.mapping;
+            prompt.detail = updated.detail;
+            prompt.scenes = updated.scenes;
+            renderPrompts();
+            renderSceneSelect();
+            showToast("提示词已更新");
+        });
+    }
+    
+    function deletePromptItem(id) {
+        if(confirm("确认永久删除该提示词吗？")){
+            promptsData = promptsData.filter(p => p.id !== id);
+            renderPrompts();
+            renderSceneSelect();
+            showToast("提示词已删除");
+        }
+    }
+
+    function renderPrompts() {
+        let filtered = promptsData.filter(p => p.scenes.some(s => selectedScenes.includes(s)));
+        if(searchKeyword.trim()){ let kw=searchKeyword.toLowerCase(); filtered = filtered.filter(p => p.term.toLowerCase().includes(kw) || p.synonyms.some(s=>s.toLowerCase().includes(kw))); }
+        const entities = filtered.filter(p=>p.type==="实体"), indicators = filtered.filter(p=>p.type==="指标"), params = filtered.filter(p=>p.type==="参数");
+        const container = document.getElementById('promptListContainer');
+        if(!container) return;
+        if(entities.length===0 && indicators.length===0 && params.length===0){ container.innerHTML='<div class="empty-tip">暂无匹配提示词，点击“+新增”添加</div>'; return; }
+        const renderCards = (list) => list.map(p => `
+            <div class="prompt-card" data-id="${p.id}">
+                <div class="prompt-term">📌 ${escapeHtml(p.term)}</div>
+                <div class="card-actions">
+                    <i class="fas fa-edit edit-prompt-icon" data-id="${p.id}" title="编辑"></i>
+                    <i class="fas fa-trash-alt delete-prompt-icon" data-id="${p.id}" title="删除"></i>
+                </div>
+                <div class="prompt-detail"><span>🏷️ ${p.synonyms.join(', ') || '无'}</span></div>
+                <div class="prompt-detail"><span>📊 ${p.mapping}</span></div>
+                <div class="prompt-detail"><span>📋 ${p.detail}</span></div>
+            </div>
+        `).join('');
+        let html = `<div class="type-section"><div class="type-header ${collapsedState.实体?'collapsed':''}" data-type="实体"><span><i class="fas fa-user"></i> 实体 · ${entities.length}</span><i class="fas fa-chevron-down"></i></div><div class="type-content">${renderCards(entities)}</div></div>`;
+        html += `<div class="type-section"><div class="type-header ${collapsedState.指标?'collapsed':''}" data-type="指标"><span><i class="fas fa-chart-line"></i> 指标 · ${indicators.length}</span><i class="fas fa-chevron-down"></i></div><div class="type-content">${renderCards(indicators)}</div></div>`;
+        html += `<div class="type-section"><div class="type-header ${collapsedState.参数?'collapsed':''}" data-type="参数"><span><i class="fas fa-sliders-h"></i> 参数 · ${params.length}</span><i class="fas fa-chevron-down"></i></div><div class="type-content">${renderCards(params)}</div></div>`;
+        container.innerHTML = html;
+        document.querySelectorAll('.type-header').forEach(h=>h.addEventListener('click',(e)=>{ let t=h.getAttribute('data-type'); if(t){ collapsedState[t]=!collapsedState[t]; renderPrompts(); } }));
+        document.querySelectorAll('.edit-prompt-icon').forEach(btn => btn.addEventListener('click',(e)=>{ let id=parseInt(btn.getAttribute('data-id')); let prompt = promptsData.find(p=>p.id===id); if(prompt) editPromptItem(prompt); }));
+        document.querySelectorAll('.delete-prompt-icon').forEach(btn => btn.addEventListener('click',(e)=>{ let id=parseInt(btn.getAttribute('data-id')); deletePromptItem(id); }));
+    }
+
+    function renderSceneSelect(){
+        const scenes = ["客户","持仓","交易","产品"];
+        const container = document.getElementById('sceneMultiSelect');
+        if(!container) return;
+        container.innerHTML = scenes.map(s => `<div class="scene-tag ${selectedScenes.includes(s)?'selected':''}" data-scene="${s}">${s}</div>`).join('');
+        document.querySelectorAll('.scene-tag').forEach(tag=>{ tag.addEventListener('click',()=>{ const scene=tag.getAttribute('data-scene'); if(selectedScenes.includes(scene)) selectedScenes=selectedScenes.filter(s=>s!==scene); else selectedScenes.push(scene); renderSceneSelect(); renderPrompts(); }); });
+    }
+    document.getElementById('promptSearch')?.addEventListener('input',(e)=>{ searchKeyword=e.target.value; renderPrompts(); });
+    document.getElementById('addPromptBtn')?.addEventListener('click', addPrompt);
+    renderSceneSelect(); renderPrompts();
+
+    // ========== 问答智能引擎 (mock数据) ==========
+    function generateFullAnswer(q){
+        const lower = q.toLowerCase();
+        if(lower.includes('本周过生日') || lower.includes('本周生日')) {
+            return { type:'table', title:'🎂 本周过生日的客户列表', columns:['客户名称','生日日期','客户类型'], rows:[['陈敏','2026-04-24','自然人'],['刘振国','2026-04-25','机构'],['王雅君','2026-04-27','自然人'],['赵司','2026-04-28','高净值']], summary:'共4位客户本周过生日', thinking:{ intent:'筛选本周生日客户', sql:"SELECT cust_name, birthday, cust_type FROM customer WHERE WEEK(birthday) = WEEK(CURDATE())", answerGen:'返回生日列表' } };
+        }
+        if(lower.includes('持仓规模超过1000万') || lower.includes('持仓超过1000万')) {
+            return { type:'table', title:'💰 持仓规模超过1000万的客户', columns:['客户名称','持仓总规模(万元)','产品数量'], rows:[['赵司','1260','4'],['林德福','1520','5'],['周裕华','1100','3']], summary:'共3位客户持仓超千万', thinking:{ intent:'筛选高净值客户', sql:"SELECT cust_name, SUM(amount) as total FROM holdings GROUP BY cust_name HAVING total > 10000000", answerGen:'输出列表' } };
+        }
+        if(lower.includes('风险等级分布') || lower.includes('风险分布')) {
+            return { type:'pie', title:'📊 客户风险等级分布', data:{'C1保守型':8,'C2稳健型':24,'C3平衡型':35,'C4进取型':28,'C5激进型':15}, summary:'C3及以上客户占比78%', thinking:{ intent:'统计风险等级占比', sql:"SELECT risk_level, COUNT(*) FROM customer GROUP BY risk_level", answerGen:'生成饼图' } };
+        }
+        if(lower.includes('客户持仓总金额排名') || lower.includes('持仓金额排名')) {
+            return { type:'bar', title:'🏆 客户持仓总金额排名 (万元)', labels:['赵司','林德福','周裕华','陈国富','孙立人'], values:[1260,1520,1100,980,870], summary:'林德福客户持仓总金额最高', thinking:{ intent:'持仓金额排行', sql:"SELECT cust_name, SUM(amount) FROM holdings GROUP BY cust_name ORDER BY 2 DESC LIMIT 5", answerGen:'柱状图展示Top5' } };
+        }
+        // 默认赵司查询
+        return { type:'text', title:'📌 查询结果', content:`✅ 赵司总持仓 ¥1,260 万，其中固收类 880 万 (69.8%)，权益类 380 万 (30.2%)。`, summary:'数据截止今日', thinking:{ intent:'查询客户赵司总持仓及固收/权益占比', sql:"SELECT SUM(CASE WHEN asset_type='固收' THEN amount ELSE 0 END) AS fixed, SUM(CASE WHEN asset_type='权益' THEN amount ELSE 0 END) AS equity FROM holdings WHERE cust_name='赵司'", answerGen:'固收880万，权益380万，总持仓1260万' } };
+    }
+
+    function renderAnswerCard(ans, container, questionText){
+        container.innerHTML = '';
+        const stepsDiv = document.createElement('div'); stepsDiv.className='thinking-steps';
+        const titleRow = document.createElement('div');
+        titleRow.style.cssText = 'font-weight: 600; color: #1f4870; padding: 8px 18px; background: #edf4fe; border-radius: 18px 18px 0 0;';
+        titleRow.innerText = '🧠 思考过程';
+        stepsDiv.appendChild(titleRow);
+        stepsDiv.innerHTML += `<div class="step"><div class="step-header" onclick="this.parentElement.classList.toggle('collapsed')"><i class="fas fa-chevron-down"></i> 🔍 意图识别</div><div class="step-content">${ans.thinking.intent}</div></div>
+                              <div class="step"><div class="step-header" onclick="this.parentElement.classList.toggle('collapsed')"><i class="fas fa-chevron-down"></i> 📋 SQL查询</div><div class="step-content"><div class="sql-code">${ans.thinking.sql}</div></div></div>
+                              <div class="step"><div class="step-header" onclick="this.parentElement.classList.toggle('collapsed')"><i class="fas fa-chevron-down"></i> 📄 答案生成</div><div class="step-content">${ans.thinking.answerGen}</div></div>`;
+        container.appendChild(stepsDiv);
+        
+        setTimeout(() => {
+            const steps = stepsDiv.querySelectorAll('.step');
+            steps.forEach(step => step.classList.add('collapsed'));
+        }, 1500);
+        const titleDiv = document.createElement('div'); titleDiv.className='answer-text'; titleDiv.innerText=ans.title; container.appendChild(titleDiv);
+        let contentElem;
+        if(ans.type === 'table'){
+            let tbl = document.createElement('table'); tbl.className='data-table';
+            let thead = document.createElement('thead'); let tr = document.createElement('tr');
+            ans.columns.forEach(c=>{let th=document.createElement('th'); th.innerText=c; tr.appendChild(th);});
+            thead.appendChild(tr); tbl.appendChild(thead);
+            let tbody = document.createElement('tbody');
+            ans.rows.forEach(row=>{let r=document.createElement('tr'); row.forEach(cell=>{let td=document.createElement('td'); td.innerText=cell; r.appendChild(td);}); tbody.appendChild(r);});
+            tbl.appendChild(tbody); contentElem=tbl;
+        } else if(ans.type === 'pie'){
+            let pieDiv = document.createElement('div'); let total = Object.values(ans.data).reduce((a,b)=>a+b,0); let stops=[], start=0, colors=['#2f69b0','#487fc7','#6190cf','#7da3db','#9bb9e8'];
+            Object.entries(ans.data).forEach(([k,v],idx)=>{ let p=(v/total)*100; stops.push(`${colors[idx]} ${start}% ${start+p}%`); start+=p; });
+            pieDiv.innerHTML = `<div style="display:flex; gap:20px; flex-wrap:wrap;"><div style="width:130px;height:130px;border-radius:50%;background:conic-gradient(${stops.join(',')});"></div><div>${Object.entries(ans.data).map(([k,v])=>`<div>${k}: ${v}人 (${((v/total)*100).toFixed(1)}%)</div>`).join('')}</div></div>`;
+            contentElem=pieDiv;
+        } else if(ans.type === 'bar'){
+            let barDiv = document.createElement('div'); let maxVal = Math.max(...ans.values);
+            barDiv.innerHTML = `<div class="bar-chart">${ans.labels.map((l,i)=>`<div class="bar-item"><div class="bar" style="height:${Math.max(25,(ans.values[i]/maxVal)*80)}px"></div><div>${ans.values[i]}w</div><div>${l}</div></div>`).join('')}</div>`;
+            contentElem=barDiv;
+        } else {
+            let textDiv = document.createElement('div'); textDiv.innerText=ans.content; textDiv.style.padding='12px 0'; contentElem=textDiv;
+        }
+        container.appendChild(contentElem);
+        let summary = document.createElement('div'); summary.style.cssText='font-size:13px; color:#4b6f94; margin-top:12px; border-top:1px solid #e2ecf8; padding-top:10px'; summary.innerText = `🔍 ${ans.summary} | 数据截止 ${new Date().toLocaleDateString()}`; container.appendChild(summary);
+        
+        let feedback = document.createElement('div'); feedback.className='feedback-actions';
+        const copyBtn = document.createElement('button'); copyBtn.className='feedback-item'; copyBtn.innerHTML='<i class="far fa-copy"></i> 复制答案';
+        copyBtn.onclick = () => { let copyText = ans.title + '\n' + (ans.type==='table'? ans.rows.map(r=>r.join('\t')).join('\n'): ans.type==='pie'? Object.entries(ans.data).map(([k,v])=>`${k}: ${v}人`).join('\n'): ans.type==='bar'? ans.labels.map((l,i)=>`${l}: ${ans.values[i]}w`).join('\n'): ans.content); navigator.clipboard.writeText(copyText); showToast('已复制'); };
+        const exportBtn = document.createElement('button'); exportBtn.className='feedback-item'; exportBtn.innerHTML='<i class="fas fa-camera"></i> 导出结果';
+        exportBtn.onclick = async () => { let btns = container.querySelectorAll('.feedback-item'); btns.forEach(btn=>btn.style.visibility='hidden'); try{ let canvas=await html2canvas(container,{scale:1.6,backgroundColor:'#ffffff'}); let link=document.createElement('a'); link.download=`问数结果.png`; link.href=canvas.toDataURL(); link.click(); }finally{ btns.forEach(btn=>btn.style.visibility='visible'); } };
+        const like = document.createElement('button'); like.className='feedback-item'; like.innerHTML='<i class="far fa-thumbs-up"></i> 有用'; like.onclick=()=>showToast('感谢反馈');
+        const dislike = document.createElement('button'); dislike.className='feedback-item'; dislike.innerHTML='<i class="far fa-thumbs-down"></i> 无用'; dislike.onclick=()=>showToast('已记录');
+        const regen = document.createElement('button'); regen.className='feedback-item'; regen.innerHTML='<i class="fas fa-rotate-right"></i> 重新生成'; regen.onclick=()=>{ let newAns=generateFullAnswer(questionText); renderAnswerCard(newAns, container, questionText); };
+        feedback.append(copyBtn, exportBtn, like, dislike, regen); container.appendChild(feedback);
+    }
+
+    // ========== 历史记录渲染与对话加载 ==========
+    function renderHistory(){
+        const container = document.getElementById('historyList');
+        if(!container) return;
+        if(historyRecords.length===0){ container.innerHTML='<div style="padding:20px;text-align:center;color:#aaa;">暂无历史</div>'; return; }
+        container.innerHTML = historyRecords.map(rec => `<div class="history-item ${currentActive===rec.q?'active':''}" data-question="${escapeHtml(rec.q)}"><i class="fas fa-message"></i> <span>${rec.q.length>28?rec.q.substring(0,28)+'…':rec.q}</span></div>`).join('');
+        document.querySelectorAll('.history-item').forEach(item=>{ item.addEventListener('click',()=>{ let q=item.getAttribute('data-question'); if(q) loadConversation(q); }); });
+    }
+
+    function loadConversation(question){
+        const flow = document.getElementById('messageFlow');
+        // 添加用户气泡
+        const userDiv = document.createElement('div'); userDiv.className='user-message-wrapper';
+        userDiv.innerHTML = `<div class="user-message">${escapeHtml(question)}<div class="copy-question-icon" onclick="event.stopPropagation(); navigator.clipboard.writeText('${escapeHtml(question)}'); showToast('已复制问题');"><i class="far fa-copy"></i> 复制</div></div>`;
+        flow.appendChild(userDiv);
+        const botDiv = document.createElement('div'); botDiv.className='bot-response';
+        flow.appendChild(botDiv);
+        const ans = generateFullAnswer(question);
+        renderAnswerCard(ans, botDiv, question);
+        flow.scrollTop = flow.scrollHeight;
+        currentActive = question;
+        renderHistory();
+    }
+
+    // 页面启动时加载对话（优先从URL参数获取问题，否则使用默认问题）
+    function initDefaultConversation() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const questionFromUrl = urlParams.get('question');
+        const defaultQuestion = questionFromUrl ? decodeURIComponent(questionFromUrl) : "赵司的总持仓是多少？固收和权益占比？";
+        loadConversation(defaultQuestion);
+    }
+
+    // 事件绑定
+    document.getElementById('sendBtn').addEventListener('click',()=>{ let q=document.getElementById('questionInput').value.trim(); if(q){ loadConversation(q); document.getElementById('questionInput').value=''; } });
+    document.getElementById('questionInput').addEventListener('keypress',e=>{ if(e.key==='Enter') document.getElementById('sendBtn').click(); });
+    document.getElementById('quick1').onclick=()=>loadConversation('查询本周过生日的客户');
+    document.getElementById('quick2').onclick=()=>loadConversation('持仓规模超过1000万的客户');
+    document.getElementById('quick3').onclick=()=>loadConversation('风险等级分布');
+    document.getElementById('quick4').onclick=()=>loadConversation('客户持仓总金额排名');
+
+    const historyPanel = document.getElementById('historyPanel'), floatBtn = document.getElementById('historyToggleFloat'), floatIcon = document.getElementById('floatIcon');
+    floatBtn.addEventListener('click',()=>{ historyPanel.classList.toggle('collapsed'); floatIcon.className = historyPanel.classList.contains('collapsed')?'fas fa-chevron-right':'fas fa-chevron-left'; });
+
+    // 初始化渲染
+    renderHistory();
+    initDefaultConversation();   // 对话框自动展示原先mock问答
+</script>
+</body>
+</html>

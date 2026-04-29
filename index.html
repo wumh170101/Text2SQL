@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>国投泰康信托 · 智能问数 | AI统一入口</title>
+    <title>智能问数 | AI统一入口</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         * {
@@ -22,9 +22,9 @@
             padding: 24px;
         }
 
-        /* 主卡片容器 */
+        /* 主容器：上下结构 */
         .ai-container {
-            width: 1280px;
+            width: 1200px;
             max-width: 100%;
             height: 860px;
             background: #ffffff;
@@ -33,113 +33,239 @@
             display: flex;
             flex-direction: column;
             overflow: hidden;
-            backdrop-filter: blur(0px);
-            transition: all 0.2s;
         }
 
-        /* 头部 */
-        .header {
-            padding: 20px 32px;
+        /* 头部导航：Logo占位 + 头像图标（无文字） */
+        .nav-header {
+            padding: 16px 32px;
             background: white;
             border-bottom: 1px solid #eef2f9;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            flex-wrap: wrap;
-            gap: 16px;
+            flex-shrink: 0;
         }
-        .brand {
+        .logo-area {
             display: flex;
             align-items: center;
             gap: 12px;
         }
-        .logo-icon {
-            width: 40px;
-            height: 40px;
-            background: linear-gradient(135deg, #0b2f4e, #1a4a76);
-            border-radius: 12px;
+        /* Logo占位块（无文字，仅图形） */
+        .logo-placeholder {
+            width: 44px;
+            height: 44px;
+            background: linear-gradient(145deg, #0b2f4e, #1a4a76);
+            border-radius: 14px;
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
-            font-size: 20px;
+            font-size: 22px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
         }
-        .brand h1 {
-            font-size: 1.6rem;
-            font-weight: 600;
-            color: #132b44;
-            letter-spacing: -0.3px;
+        /* 隐藏文字，仅保留Logo占位 */
+        .logo-text {
+            display: none;
         }
-        .welcome-section {
-            text-align: right;
-        }
-        .greeting {
-            font-size: 0.85rem;
-            color: #6f8fae;
-        }
-        .user-name {
-            font-weight: 600;
-            color: #1e4870;
-            font-size: 0.95rem;
-        }
-
-        /* 模式切换栏 */
-        .mode-bar {
-            padding: 12px 32px 0 32px;
-            background: white;
-            border-bottom: 1px solid #edf2f9;
+        .avatar-icon {
+            width: 44px;
+            height: 44px;
+            background: #2b5280;
+            border-radius: 50%;
             display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
             align-items: center;
-        }
-        .mode-item {
-            padding: 8px 20px;
-            border-radius: 40px;
-            font-size: 0.85rem;
-            font-weight: 500;
-            background: transparent;
-            color: #4f6f8f;
+            justify-content: center;
             cursor: pointer;
-            transition: all 0.2s;
-            border: 1px solid transparent;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23ffffff"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>');
+            background-size: 55%;
+            background-position: center 55%;
+            background-repeat: no-repeat;
+            transition: transform 0.1s;
         }
-        .mode-item i {
-            margin-right: 8px;
-            font-size: 0.8rem;
-        }
-        .mode-item.active {
-            background: #eef3fc;
-            color: #1e5a9c;
-            border-color: #cddff2;
-        }
-        .mode-item:hover:not(.active) {
-            background: #f5f9fe;
-            color: #2d628f;
+        .avatar-icon:hover {
+            transform: scale(1.02);
+            background-color: #1f4870;
         }
 
-        /* 核心对话区 */
-        .conversation-area {
+        /* 上下核心布局：上部 1/3 用户输入区，下部 2/3 对话展示区 */
+        .main-vertical {
             flex: 1;
             display: flex;
             flex-direction: column;
+            min-height: 0;
             background: #fbfdff;
+        }
+
+        /* 上部 1/3 交互区域 (问候、模式切换、输入区) */
+        .input-zone {
+            height: 33.333%;
+            background: #ffffff;
+            border-bottom: 1px solid #ecf2f9;
+            padding: 28px 32px 24px 32px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            overflow-y: auto;
+            flex-shrink: 0;
+        }
+
+        /* 问候区域 - 只保留 "您好，XXX" */
+        .greeting-area h2 {
+            font-size: 1.7rem;
+            font-weight: 600;
+            color: #1a3f60;
+            line-height: 1.2;
+            margin-bottom: 0;
+        }
+        /* 去掉副标题描述 */
+        .greeting-area p {
+            display: none;
+        }
+
+        /* 模式切换 (6个模式: 聊天/网页/文档/PPT/表格/产品) */
+        .mode-switch {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin: 4px 0 8px;
+        }
+        .mode-chip {
+            background: #f0f5fc;
+            border: 1px solid #e1ebf5;
+            border-radius: 40px;
+            padding: 6px 18px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: #2f608b;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .mode-chip i {
+            font-size: 0.8rem;
+        }
+        .mode-chip.active {
+            background: #1e4a78;
+            border-color: #1e4a78;
+            color: white;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+        }
+        .mode-chip:hover:not(.active) {
+            background: #e6eff9;
+            transform: translateY(-1px);
+        }
+
+        /* 智能问数核心卡片 */
+        .ask-card {
+            background: #ffffff;
+            border-radius: 28px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.02), 0 1px 3px rgba(0, 0, 0, 0.03);
+            border: 1px solid #eef3fc;
+            padding: 20px;
+            margin-top: 6px;
+        }
+        .ask-label {
+            font-weight: 600;
+            color: #1e4670;
+            margin-bottom: 16px;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .input-group {
+            background: #f5f9fe;
+            border-radius: 60px;
+            border: 1px solid #dae6f2;
+            display: flex;
+            align-items: center;
+            padding: 4px 4px 4px 20px;
+            transition: all 0.2s;
+        }
+        .input-group:focus-within {
+            border-color: #8fb4db;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(26, 78, 122, 0.08);
+        }
+        .input-group input {
+            flex: 1;
+            border: none;
+            background: transparent;
+            padding: 14px 0;
+            font-size: 0.9rem;
+            outline: none;
+            color: #1a2f44;
+        }
+        .input-group input::placeholder {
+            color: #9bb8d4;
+            font-weight: 400;
+        }
+        .send-action {
+            width: 46px;
+            height: 46px;
+            border-radius: 50%;
+            background: #1a4e7a;
+            border: none;
+            color: white;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+        }
+        .send-action:hover {
+            background: #0e3d62;
+            transform: scale(0.96);
+        }
+        .quick-hint {
+            margin-top: 16px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .quick-tag {
+            background: #eef3fc;
+            border-radius: 40px;
+            padding: 5px 14px;
+            font-size: 0.7rem;
+            color: #326a96;
+            cursor: pointer;
+            transition: background 0.1s;
+        }
+        .quick-tag:hover {
+            background: #e2ebf6;
+        }
+
+        /* 下部 2/3 对话展示区（初始完全留白，无任何预设气泡） */
+        .conversation-area {
+            height: 66.666%;
+            background: #ffffff;
+            display: flex;
+            flex-direction: column;
             overflow: hidden;
+            border-top: 1px solid #eff3fa;
+        }
+        /* 移除对话记录头部区域 */
+        .chat-header {
+            display: none;
         }
         .chat-messages {
             flex: 1;
             overflow-y: auto;
-            padding: 24px 32px;
+            padding: 24px 28px 28px 28px;
             display: flex;
             flex-direction: column;
             gap: 20px;
         }
 
-        /* 消息气泡 */
+        /* 消息气泡样式 (简洁留白) */
         .message-row {
             display: flex;
-            gap: 14px;
-            max-width: 85%;
+            gap: 12px;
+            max-width: 80%;
         }
         .assistant-message {
             align-self: flex-start;
@@ -148,9 +274,9 @@
             align-self: flex-end;
             flex-direction: row-reverse;
         }
-        .avatar {
-            width: 36px;
-            height: 36px;
+        .avatar-small {
+            width: 32px;
+            height: 32px;
             background: #eef2fc;
             border-radius: 50%;
             display: flex;
@@ -158,32 +284,31 @@
             justify-content: center;
             flex-shrink: 0;
             color: #2b659b;
-            font-size: 18px;
+            font-size: 15px;
         }
         .bubble {
             background: white;
-            padding: 12px 18px;
+            padding: 10px 16px;
             border-radius: 22px;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             line-height: 1.45;
             color: #1e2f3f;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+            box-shadow: 0 1px 2px rgba(0,0,0,0.02);
             border: 1px solid #eef2f8;
         }
         .user-message .bubble {
             background: #1a4e7a;
             color: white;
             border: none;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
         }
         .assistant-message .bubble {
             background: #ffffff;
-            border: 1px solid #e6edf6;
+            border: 1px solid #e9eff8;
         }
         .typing-indicator {
             display: flex;
             gap: 6px;
-            padding: 12px 16px;
+            padding: 8px 12px;
             align-items: center;
         }
         .typing-indicator span {
@@ -199,81 +324,58 @@
             30% { transform: scale(1.2); opacity: 1; }
         }
 
-        /* 输入区域 */
-        .input-panel {
-            background: white;
-            border-top: 1px solid #eef2f9;
-            padding: 18px 32px 24px;
+        /* 表格/图表辅助样式 */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.75rem;
+            margin: 8px 0;
         }
-        .input-wrapper {
-            background: #f6fafd;
-            border-radius: 60px;
-            border: 1px solid #dee8f2;
+        .data-table th, .data-table td {
+            padding: 6px 8px;
+            text-align: left;
+            border-bottom: 1px solid #e2eaf2;
+        }
+        .data-table th {
+            background: #eef3fc;
+            font-weight: 600;
+        }
+        .mini-bar {
             display: flex;
-            align-items: center;
-            padding: 6px 6px 6px 24px;
-            transition: all 0.2s;
-        }
-        .input-wrapper:focus-within {
-            border-color: #8fb4db;
-            background: white;
-            box-shadow: 0 0 0 3px rgba(26, 78, 122, 0.05);
-        }
-        .input-wrapper input {
-            flex: 1;
-            border: none;
-            background: transparent;
-            padding: 14px 0;
-            font-size: 0.9rem;
-            outline: none;
-            color: #1e2f3f;
-        }
-        .input-wrapper input::placeholder {
-            color: #9db9d4;
-        }
-        .actions {
-            display: flex;
+            align-items: flex-end;
             gap: 12px;
-            align-items: center;
+            flex-wrap: wrap;
+            margin: 10px 0;
         }
-        .shortcut-hint {
-            font-size: 0.7rem;
-            color: #90a8c4;
-            margin-right: 8px;
+        .mini-bar-item {
+            text-align: center;
+            width: 60px;
         }
-        .send-btn {
-            width: 44px;
-            height: 44px;
-            border-radius: 50%;
-            background: #1a4e7a;
-            border: none;
+        .bar {
+            width: 28px;
+            background: #2d62a5;
+            border-radius: 6px;
+            margin: 0 auto 6px;
+        }
+        .toast-msg {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1e3a6b;
             color: white;
-            cursor: pointer;
-            transition: all 0.2s;
-            font-size: 1rem;
+            padding: 8px 20px;
+            border-radius: 40px;
+            font-size: 13px;
+            z-index: 1000;
+            animation: fadeOut 1.5s forwards;
+            pointer-events: none;
         }
-        .send-btn:hover {
-            background: #0e3d62;
-            transform: scale(0.96);
+        @keyframes fadeOut {
+            0% { opacity: 1; }
+            70% { opacity: 1; }
+            100% { opacity: 0; visibility: hidden; }
         }
-        .mode-tip {
-            margin-top: 12px;
-            font-size: 0.7rem;
-            color: #8aa9c9;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .history-link {
-            cursor: pointer;
-            color: #2b6a9e;
-            font-weight: 500;
-        }
-        .history-link i {
-            margin-right: 4px;
-        }
-
-        /* 滚动条 */
         ::-webkit-scrollbar {
             width: 5px;
         }
@@ -289,62 +391,66 @@
 </head>
 <body>
 <div class="ai-container">
-    <!-- 头部 -->
-    <div class="header">
-        <div class="brand">
-            <div class="logo-icon"><i class="fas fa-chart-network"></i></div>
-            <h1>国投泰康信托</h1>
+    <!-- 顶部导航：Logo占位（纯图形） + 头像图标 -->
+    <div class="nav-header">
+        <div class="logo-area">
+            <div class="logo-placeholder"><i class="fas fa-building-columns"></i></div>
+            <!-- 隐藏文字，仅占位Logo -->
+            <span class="logo-text"></span>
         </div>
-        <div class="welcome-section">
-            <div class="greeting">下午好，勤劳的</div>
-            <div class="user-name"><i class="far fa-smile-wink"></i> 中电金信吴敏华</div>
-        </div>
+        <div class="avatar-icon" id="avatarIcon" title="个人中心"></div>
     </div>
 
-    <!-- 模式切换栏（仅文字替换：“数字员工”相关文案已改为“智能问数”） -->
-    <div class="mode-bar">
-        <div class="mode-item active" data-mode="chat"><i class="fas fa-comment-dots"></i> 聊天模式</div>
-        <div class="mode-item" data-mode="web"><i class="fas fa-globe"></i> 网页模式</div>
-        <div class="mode-item" data-mode="doc"><i class="fas fa-file-alt"></i> 文档模式</div>
-        <div class="mode-item" data-mode="ppt"><i class="fas fa-chalkboard"></i> PPT模式</div>
-        <div class="mode-item" data-mode="table"><i class="fas fa-table"></i> 表格模式</div>
-        <div class="mode-item" data-mode="product"><i class="fas fa-chart-line"></i> 产品模式</div>
-    </div>
+    <!-- 上下结构：1/3 用户输入区 + 2/3 对话展示区（初始完全空白） -->
+    <div class="main-vertical">
+        <!-- 上部 1/3：问候（您好,XXX）、模式切换、输入组件 -->
+        <div class="input-zone">
+            <div class="greeting-area">
+                <h2>您好，XXX <i class="far fa-smile-wink" style="color:#2e6a9e;"></i></h2>
+                <!-- 已移除副标题描述 -->
+            </div>
 
-    <!-- 对话核心区：智能问数对话（原“数字员工”已统一改为“智能问数”） -->
-    <div class="conversation-area">
-        <div class="chat-messages" id="chatMessages">
-            <!-- 初始提示：将原“数字员工”替换为“智能问数” -->
-            <div class="message-row assistant-message">
-                <div class="avatar"><i class="fas fa-robot"></i></div>
-                <div class="bubble">
-                    ✨ 你好，我是<strong>智能问数</strong>助手。你可以向我咨询信托业务数据，例如：<br>
-                    📊 “本周过生日的客户” &nbsp;&nbsp; 📈 “持仓规模超过1000万的客户” <br>
-                    🥧 “风险等级分布” &nbsp;&nbsp; 🏆 “客户持仓总金额排名”<br>
-                    我会自动识别意图并返回表格、图表或明细。
+            <!-- 模式切换区（聊天、网页、文档、PPT、表格、产品 六个模式） -->
+            <div class="mode-switch" id="modeSwitchContainer">
+                <div class="mode-chip active" data-mode="chat"><i class="fas fa-comment-dots"></i> 聊天模式</div>
+                <div class="mode-chip" data-mode="web"><i class="fas fa-globe"></i> 网页模式</div>
+                <div class="mode-chip" data-mode="doc"><i class="fas fa-file-alt"></i> 文档模式</div>
+                <div class="mode-chip" data-mode="ppt"><i class="fas fa-chalkboard"></i> PPT模式</div>
+                <div class="mode-chip" data-mode="table"><i class="fas fa-table"></i> 表格模式</div>
+                <div class="mode-chip" data-mode="product"><i class="fas fa-chart-line"></i> 产品模式</div>
+            </div>
+
+            <!-- 智能问数输入框 + 快捷指令 -->
+            <div class="ask-card">
+                <div class="input-group">
+                    <i class="fas fa-robot" style="color:#1a4e7a; margin-right: 8px;"></i>
+                    <input type="text" id="questionInput" placeholder="智能问数 - 例如：本周过生日的客户有哪些？">
+                    <button class="send-action" id="sendBtn"><i class="fas fa-paper-plane"></i></button>
+                </div>
+                <div class="quick-hint" id="quickHintContainer">
+                    <span class="quick-tag" data-quick="查询本周过生日的客户">🎂 本周生日</span>
+                    <span class="quick-tag" data-quick="持仓规模超过1000万的客户">💰 持仓超1000万</span>
+                    <span class="quick-tag" data-quick="风险等级分布">📊 风险分布</span>
+                    <span class="quick-tag" data-quick="客户持仓总金额排名">🏆 持仓排名</span>
+                    <span class="quick-tag" data-quick="赵司的总持仓是多少？固收和权益占比？">📌 赵司持仓</span>
+                </div>
+                <div style="margin-top: 12px; font-size: 11px; color:#8dabc9; text-align:center;">
+                    <i class="far fa-keyboard"></i> Enter发送 · 数据智能解析
                 </div>
             </div>
         </div>
 
-        <!-- 输入区 -->
-        <div class="input-panel">
-            <div class="input-wrapper">
-                <input type="text" id="questionInput" placeholder="Enter发送，Ctrl+Enter换行 | 试试问：本周生日客户有哪些？">
-                <div class="actions">
-                    <span class="shortcut-hint"><i class="far fa-keyboard"></i></span>
-                    <button class="send-btn" id="sendBtn"><i class="fas fa-paper-plane"></i></button>
-                </div>
-            </div>
-            <div class="mode-tip">
-                <span><i class="fas fa-microphone-alt"></i> 智能问数 · 支持多轮对话</span>
-                <span class="history-link" id="historyTrigger"><i class="fas fa-clock-rotate-left"></i> 查看历史会话</span>
+        <!-- 下部 2/3 对话展示区（初始完全留白，无任何气泡或提示文字） -->
+        <div class="conversation-area">
+            <div class="chat-messages" id="chatMessages">
+                <!-- 初始完全空白，不显示任何欢迎语或占位符 -->
             </div>
         </div>
     </div>
 </div>
 
 <script>
-    // ---------- 智能问数核心（保持原逻辑，仅修改文字话术中的“数字员工”为“智能问数”） ----------
+    // ---------- 智能问数核心函数（完整分析展示）----------
     function generateAnswer(question) {
         const lower = question.toLowerCase();
         if (lower.includes('本周过生日') || lower.includes('本周生日') || lower.includes('生日客户')) {
@@ -399,7 +505,7 @@
                 summary: '资产配置以固收为主，稳健风格。'
             };
         }
-        // 通用智能回复（文案微调，不涉及“数字员工”）
+        // 默认智能回复
         return {
             type: 'text',
             title: '🔍 智能问数分析',
@@ -408,35 +514,26 @@
         };
     }
 
-    // 渲染答案（完全保留原样，UI样式不变）
+    // 渲染答案到气泡
     function renderAnswerToDOM(answer, container) {
         container.innerHTML = ''; 
-
         const titleDiv = document.createElement('div');
-        titleDiv.style.fontSize = '1rem';
+        titleDiv.style.fontSize = '0.9rem';
         titleDiv.style.fontWeight = '600';
-        titleDiv.style.marginBottom = '12px';
+        titleDiv.style.marginBottom = '8px';
         titleDiv.style.color = '#1f4870';
         titleDiv.innerText = answer.title;
         container.appendChild(titleDiv);
 
         let contentWrapper = document.createElement('div');
-
         if (answer.type === 'table') {
             const table = document.createElement('table');
-            table.style.width = '100%';
-            table.style.borderCollapse = 'collapse';
-            table.style.fontSize = '0.8rem';
-            table.style.margin = '12px 0';
+            table.className = 'data-table';
             const thead = document.createElement('thead');
             const headerRow = document.createElement('tr');
             answer.columns.forEach(col => {
                 const th = document.createElement('th');
                 th.innerText = col;
-                th.style.padding = '8px 10px';
-                th.style.textAlign = 'left';
-                th.style.background = '#eef3fc';
-                th.style.borderBottom = '1px solid #dce5f0';
                 headerRow.appendChild(th);
             });
             thead.appendChild(headerRow);
@@ -447,8 +544,6 @@
                 row.forEach(cell => {
                     const td = document.createElement('td');
                     td.innerText = cell;
-                    td.style.padding = '8px 10px';
-                    td.style.borderBottom = '1px solid #eef2f9';
                     tr.appendChild(td);
                 });
                 tbody.appendChild(tr);
@@ -457,90 +552,55 @@
             contentWrapper.appendChild(table);
         } 
         else if (answer.type === 'pie') {
-            const pieContainer = document.createElement('div');
             const total = Object.values(answer.data).reduce((a,b) => a+b, 0);
-            let colors = ['#2f69b0', '#487fc7', '#6190cf', '#7da3db', '#9bb9e8', '#b6cdeb'];
+            let colors = ['#2f69b0', '#487fc7', '#6190cf', '#7da3db', '#9bb9e8'];
+            let gradientStops = [];
             let start = 0;
-            const gradientStops = [];
-            Object.entries(answer.data).forEach(([label, val], idx) => {
+            const entries = Object.entries(answer.data);
+            entries.forEach(([label, val], idx) => {
                 let percent = (val / total) * 100;
                 gradientStops.push(`${colors[idx % colors.length]} ${start}% ${start + percent}%`);
                 start += percent;
             });
-            const pieStyle = `width:110px; height:110px; border-radius:50%; background:conic-gradient(${gradientStops.join(',')});`;
-            const legendHtml = Object.entries(answer.data).map(([k,v]) => `<div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;"><span style="display:inline-block; width:12px; height:12px; background:${colors.shift()}; border-radius:2px;"></span><span>${k}: ${v}人 (${((v/total)*100).toFixed(1)}%)</span></div>`).join('');
-            pieContainer.innerHTML = `<div style="display:flex; gap:24px; align-items:center; flex-wrap:wrap;"><div style="${pieStyle}"></div><div>${legendHtml}</div></div>`;
-            contentWrapper.appendChild(pieContainer);
+            const pieStyle = `width:100px; height:100px; border-radius:50%; background:conic-gradient(${gradientStops.join(',')});`;
+            const legendHtml = entries.map(([k,v]) => `<div style="display:flex; align-items:center; gap:6px; margin-bottom:4px;"><span style="display:inline-block; width:10px; height:10px; background:${colors.shift()}; border-radius:2px;"></span><span style="font-size:11px;">${k}: ${v}人 (${((v/total)*100).toFixed(1)}%)</span></div>`).join('');
+            contentWrapper.innerHTML = `<div style="display:flex; gap:16px; align-items:center; flex-wrap:wrap;"><div style="${pieStyle}"></div><div>${legendHtml}</div></div>`;
         } 
         else if (answer.type === 'bar') {
             const maxVal = Math.max(...answer.values);
-            const barHtml = `<div style="display:flex; gap:28px; flex-wrap:wrap; margin: 16px 0;">${answer.labels.map((l, i) => `
-                <div style="text-align:center; width:70px;">
-                    <div style="width:36px; margin:0 auto 8px; background:#2d62a5; border-radius:6px 6px 4px 4px; height:${Math.max(28, (answer.values[i]/maxVal)*70)}px;"></div>
-                    <div style="font-size:12px; font-weight:600;">${answer.values[i]}w</div>
-                    <div style="font-size:11px; color:#5a7596;">${l}</div>
+            const barHtml = `<div class="mini-bar">${answer.labels.map((l, i) => `
+                <div class="mini-bar-item">
+                    <div class="bar" style="height:${Math.max(24, (answer.values[i]/maxVal)*55)}px;"></div>
+                    <div style="font-size:10px; font-weight:600;">${answer.values[i]}w</div>
+                    <div style="font-size:9px;">${l}</div>
                 </div>
             `).join('')}</div>`;
             contentWrapper.innerHTML = barHtml;
         } 
         else {
             const textDiv = document.createElement('div');
-            textDiv.style.padding = '8px 0';
+            textDiv.style.padding = '4px 0';
             textDiv.style.lineHeight = '1.5';
             textDiv.innerText = answer.content;
             contentWrapper.appendChild(textDiv);
         }
-
         container.appendChild(contentWrapper);
-
         const summaryDiv = document.createElement('div');
-        summaryDiv.style.fontSize = '0.7rem';
+        summaryDiv.style.fontSize = '0.65rem';
         summaryDiv.style.color = '#7997b9';
-        summaryDiv.style.marginTop = '14px';
+        summaryDiv.style.marginTop = '10px';
         summaryDiv.style.borderTop = '1px solid #eef2f9';
-        summaryDiv.style.paddingTop = '10px';
-        summaryDiv.innerText = `📎 ${answer.summary}  |  智能问数 · 数据截止 ${new Date().toLocaleDateString()}`;
+        summaryDiv.style.paddingTop = '8px';
+        summaryDiv.innerText = `📎 ${answer.summary}  |  智能问数 · 实时解析`;
         container.appendChild(summaryDiv);
     }
 
     function showTyping(container) {
         const typingDiv = document.createElement('div');
         typingDiv.className = 'typing-indicator';
-        typingDiv.innerHTML = '<span></span><span></span><span></span><span style="margin-left:6px; font-size:12px;">智能问数分析中...</span>';
+        typingDiv.innerHTML = '<span></span><span></span><span></span><span style="margin-left:6px; font-size:11px;">智能问数分析中...</span>';
         container.appendChild(typingDiv);
         return typingDiv;
-    }
-
-    function addUserMessage(question) {
-        const messagesDiv = document.getElementById('chatMessages');
-        const userMsgDiv = document.createElement('div');
-        userMsgDiv.className = 'message-row user-message';
-        userMsgDiv.innerHTML = `
-            <div class="avatar"><i class="fas fa-user-circle"></i></div>
-            <div class="bubble">${escapeHtml(question)}</div>
-        `;
-        messagesDiv.appendChild(userMsgDiv);
-        messagesDiv.scrollTop = messagesDiv.scrollHeight;
-        return messagesDiv;
-    }
-
-    async function addAssistantResponse(question) {
-        const messagesDiv = document.getElementById('chatMessages');
-        const assistantWrap = document.createElement('div');
-        assistantWrap.className = 'message-row assistant-message';
-        assistantWrap.innerHTML = `<div class="avatar"><i class="fas fa-brain"></i></div><div class="bubble" id="tempAssistantBubble"></div>`;
-        messagesDiv.appendChild(assistantWrap);
-        const bubbleDiv = assistantWrap.querySelector('.bubble');
-        const thinkingElem = showTyping(bubbleDiv);
-        
-        await new Promise(resolve => setTimeout(resolve, 580));
-        const answer = generateAnswer(question);
-        bubbleDiv.innerHTML = '';
-        const answerContainer = document.createElement('div');
-        answerContainer.style.width = '100%';
-        renderAnswerToDOM(answer, answerContainer);
-        bubbleDiv.appendChild(answerContainer);
-        messagesDiv.scrollTop = messagesDiv.scrollHeight;
     }
 
     function escapeHtml(str) {
@@ -553,89 +613,97 @@
         });
     }
 
+    async function addUserMessage(question) {
+        const messagesDiv = document.getElementById('chatMessages');
+        const userMsgDiv = document.createElement('div');
+        userMsgDiv.className = 'message-row user-message';
+        userMsgDiv.innerHTML = `
+            <div class="avatar-small"><i class="fas fa-user-circle"></i></div>
+            <div class="bubble">${escapeHtml(question)}</div>
+        `;
+        messagesDiv.appendChild(userMsgDiv);
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    }
+
+    async function addAssistantResponse(question) {
+        const messagesDiv = document.getElementById('chatMessages');
+        const assistantWrap = document.createElement('div');
+        assistantWrap.className = 'message-row assistant-message';
+        assistantWrap.innerHTML = `<div class="avatar-small"><i class="fas fa-brain"></i></div><div class="bubble" id="tempAssistantBubble"></div>`;
+        messagesDiv.appendChild(assistantWrap);
+        const bubbleDiv = assistantWrap.querySelector('.bubble');
+        const thinkingElem = showTyping(bubbleDiv);
+        await new Promise(resolve => setTimeout(resolve, 500));
+        const answer = generateAnswer(question);
+        bubbleDiv.innerHTML = '';
+        const answerContainer = document.createElement('div');
+        answerContainer.style.width = '100%';
+        renderAnswerToDOM(answer, answerContainer);
+        bubbleDiv.appendChild(answerContainer);
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    }
+
     async function sendMessage() {
         const input = document.getElementById('questionInput');
         const question = input.value.trim();
         if (!question) return;
-        addUserMessage(question);
         input.value = '';
-        await addAssistantResponse(question);
+        const encodedQuestion = encodeURIComponent(question);
+        window.location.href = `home.html?question=${encodedQuestion}`;
     }
 
-    // 模式切换（视觉演示，文字描述保持与“智能问数”统一）
+    // 模式切换（视觉反馈 + toast）
     let currentMode = 'chat';
-    const modeItems = document.querySelectorAll('.mode-item');
+    const modeChips = document.querySelectorAll('.mode-chip');
     function setMode(mode) {
         currentMode = mode;
-        modeItems.forEach(item => {
-            const itemMode = item.getAttribute('data-mode');
-            if (itemMode === mode) {
-                item.classList.add('active');
-            } else {
-                item.classList.remove('active');
-            }
+        modeChips.forEach(chip => {
+            const chipMode = chip.getAttribute('data-mode');
+            if (chipMode === mode) chip.classList.add('active');
+            else chip.classList.remove('active');
         });
-        const tipToast = document.createElement('div');
-        tipToast.innerText = `已切换至 ${mode} 模式，智能问数将优先以该方式呈现数据`;
-        tipToast.style.position = 'fixed';
-        tipToast.style.bottom = '90px';
-        tipToast.style.left = '50%';
-        tipToast.style.transform = 'translateX(-50%)';
-        tipToast.style.background = '#1e4870cc';
-        tipToast.style.color = 'white';
-        tipToast.style.padding = '6px 18px';
-        tipToast.style.borderRadius = '40px';
-        tipToast.style.fontSize = '12px';
-        tipToast.style.zIndex = '999';
-        tipToast.style.backdropFilter = 'blur(8px)';
-        document.body.appendChild(tipToast);
-        setTimeout(() => tipToast.remove(), 1600);
+        showToast(`已切换至「${mode}」模式，智能问数将优先以该方式呈现数据`);
     }
-
-    modeItems.forEach(item => {
-        item.addEventListener('click', () => {
-            const mode = item.getAttribute('data-mode');
+    function showToast(msg) {
+        let toast = document.createElement('div');
+        toast.className = 'toast-msg';
+        toast.innerText = msg;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 1600);
+    }
+    modeChips.forEach(chip => {
+        chip.addEventListener('click', () => {
+            const mode = chip.getAttribute('data-mode');
             if (mode) setMode(mode);
         });
     });
 
-    const historyTrigger = document.getElementById('historyTrigger');
-    if (historyTrigger) {
-        historyTrigger.addEventListener('click', () => {
-            const historyMock = [
-                "赵司的总持仓是多少？固收和权益占比？",
-                "查询本周过生日的客户",
-                "持仓规模超过1000万的客户",
-                "风险等级分布",
-                "客户持仓总金额排名"
-            ];
-            const msg = `📋 历史会话 (最近5条):\n${historyMock.map((q, idx) => `${idx+1}. ${q}`).join('\n')}`;
-            alert(msg);
+    // 快捷标签绑定
+    document.querySelectorAll('.quick-tag').forEach(tag => {
+        tag.addEventListener('click', (e) => {
+            const question = tag.getAttribute('data-quick');
+            if (question) {
+                document.getElementById('questionInput').value = question;
+                sendMessage();
+            }
         });
-    }
+    });
 
-    const questionInput = document.getElementById('questionInput');
-    questionInput.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' && !e.ctrlKey && !e.shiftKey) {
+    // 发送按钮与键盘事件
+    const sendBtn = document.getElementById('sendBtn');
+    const questionInputDom = document.getElementById('questionInput');
+    sendBtn.addEventListener('click', sendMessage);
+    questionInputDom.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey && !e.ctrlKey) {
             e.preventDefault();
             sendMessage();
         }
     });
 
-    document.getElementById('sendBtn').addEventListener('click', sendMessage);
-    
-    const quickExamples = [
-        "查询本周过生日的客户",
-        "持仓规模超过1000万的客户",
-        "风险等级分布",
-        "客户持仓总金额排名"
-    ];
-    const msgContainer = document.getElementById('chatMessages');
-    msgContainer.addEventListener('dblclick', (e) => {
-        if (e.target.closest('.bubble')) return;
-        const randomIdx = Math.floor(Math.random() * quickExamples.length);
-        questionInput.value = quickExamples[randomIdx];
-        questionInput.focus();
+    // 头像点击轻提示
+    const avatar = document.getElementById('avatarIcon');
+    avatar.addEventListener('click', () => {
+        showToast('个人中心');
     });
 </script>
 </body>
