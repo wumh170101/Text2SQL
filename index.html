@@ -178,6 +178,50 @@
             font-size: 14px;
             background: transparent;
         }
+        /* 麦克风按钮 */
+        .mic-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: none;
+            background: #f0f4f8;
+            color: #2b5280;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 6px;
+            transition: all 0.2s;
+            position: relative;
+        }
+        .mic-btn:hover {
+            background: #e2eaf5;
+        }
+        .mic-btn.recording {
+            background: #ff4757;
+            color: white;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+        .mic-btn.recording::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: rgba(255, 71, 87, 0.3);
+            transform: translate(-50%, -50%);
+            animation: ripple 1.5s ease-out infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        @keyframes ripple {
+            0% { width: 40px; height: 40px; opacity: 0.6; }
+            100% { width: 76px; height: 76px; opacity: 0; }
+        }
         .send-action {
             width: 44px;
             height: 44px;
@@ -306,6 +350,7 @@
                         <option value="prompt-expert">Prompt专家</option>
                     </select>
                     <input type="text" id="questionInput" value="查询本周过生日的客户" placeholder="请输入您的问题...">
+                    <button class="mic-btn" id="micBtn"><i class="fas fa-microphone"></i></button>
                     <button class="send-action" id="sendBtn"><i class="fas fa-paper-plane"></i></button>
                 </div>
                 <div class="quick-hint" id="quickHintContainer">
@@ -368,6 +413,68 @@
         document.getElementById('questionInput').addEventListener('keyup', function(e) {
             if (e.key === 'Enter') {
                 sendMessage();
+            }
+        });
+
+        // 麦克风语音输入功能
+        const micBtn = document.getElementById('micBtn');
+        const questionInput = document.getElementById('questionInput');
+        let recognition = null;
+        let isRecording = false;
+
+        micBtn.addEventListener('click', function() {
+            if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+                showToast('您的浏览器不支持语音识别');
+                return;
+            }
+
+            if (isRecording) {
+                // 停止录音
+                recognition.stop();
+                isRecording = false;
+                micBtn.classList.remove('recording');
+                showToast('语音输入已停止');
+            } else {
+                // 开始录音
+                recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+                recognition.continuous = false;
+                recognition.interimResults = true;
+                recognition.lang = 'zh-CN';
+
+                recognition.onstart = function() {
+                    isRecording = true;
+                    micBtn.classList.add('recording');
+                    showToast('正在听，请说话...');
+                };
+
+                recognition.onresult = function(event) {
+                    let transcript = '';
+                    for (let i = event.resultIndex; i < event.results.length; i++) {
+                        transcript += event.results[i][0].transcript;
+                    }
+                    questionInput.value = transcript;
+                };
+
+                recognition.onerror = function(event) {
+                    isRecording = false;
+                    micBtn.classList.remove('recording');
+                    if (event.error === 'not-allowed') {
+                        showToast('请允许麦克风权限');
+                    } else {
+                        showToast('语音识别出错: ' + event.error);
+                    }
+                };
+
+                recognition.onend = function() {
+                    if (isRecording) {
+                        // 自动结束
+                        isRecording = false;
+                        micBtn.classList.remove('recording');
+                        showToast('语音输入已结束');
+                    }
+                };
+
+                recognition.start();
             }
         });
     });
