@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>信托智数 · 日志管理中心</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        body {
+            background: #eef2f8;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .log-dashboard {
+            width: 1600px;
+            max-width: 100%;
+            height: 960px;
+            background: #ffffff;
+            border-radius: 32px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* 头部 */
+        .header {
+            padding: 18px 28px;
+            background: white;
+            border-bottom: 1px solid #e2eaf5;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-shrink: 0;
+        }
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .logo-icon {
+            width: 44px;
+            height: 44px;
+            background: linear-gradient(135deg, #0f2b4d, #1f4a7a);
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 22px;
+        }
+        .logo-text {
+            font-weight: 700;
+            font-size: 20px;
+            color: #152c42;
+        }
+        .avatar {
+            width: 44px;
+            height: 44px;
+            background: #2b5280;
+            border-radius: 50%;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23ffffff"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>');
+            background-size: 55%;
+            background-position: center 55%;
+            background-repeat: no-repeat;
+        }
+
+        /* 主体 */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 24px 28px;
+            overflow-y: auto;
+            background: #f9fbfe;
+        }
+
+        /* 筛选栏 */
+        .filter-bar {
+            background: white;
+            border-radius: 24px;
+            padding: 20px 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+            border: 1px solid #e9edf2;
+        }
+        .filter-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-bottom: 16px;
+            align-items: flex-end;
+        }
+        .filter-item {
+            flex: 1;
+            min-width: 140px;
+        }
+        .filter-item label {
+            display: block;
+            font-size: 12px;
+            color: #5d7188;
+            margin-bottom: 6px;
+            font-weight: 500;
+        }
+        .filter-item select, .filter-item input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #d0ddec;
+            border-radius: 12px;
+            font-size: 13px;
+            background: white;
+            outline: none;
+        }
+        .filter-actions {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+        .btn-primary {
+            background: #1e3a6b;
+            color: white;
+            border: none;
+            border-radius: 30px;
+            padding: 8px 24px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+        }
+        .btn-secondary {
+            background: #edf4fe;
+            color: #1e3a6b;
+            border: 1px solid #c7d8f0;
+            border-radius: 30px;
+            padding: 8px 24px;
+            font-size: 13px;
+            cursor: pointer;
+        }
+        .btn-export {
+            background: #e8f0fc;
+            color: #1e3a6b;
+            border: 1px solid #c7d8f0;
+            border-radius: 30px;
+            padding: 8px 20px;
+            font-size: 13px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* 表格区 */
+        .log-table-container {
+            background: white;
+            border-radius: 24px;
+            border: 1px solid #e9edf2;
+            overflow: hidden;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        .table-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid #e9edf2;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #fefefe;
+        }
+        .log-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+        .log-table th {
+            text-align: left;
+            padding: 14px 16px;
+            background: #f8fafc;
+            font-weight: 600;
+            color: #2c3e5c;
+            border-bottom: 1px solid #e9edf2;
+        }
+        .log-table td {
+            padding: 14px 16px;
+            border-bottom: 1px solid #f0f2f6;
+            color: #2c3e5c;
+        }
+        .log-table tr:hover {
+            background: #fafcff;
+            cursor: pointer;
+        }
+        .fallback-badge {
+            background: #fef3c7;
+            color: #b45309;
+            padding: 4px 10px;
+            border-radius: 30px;
+            font-size: 11px;
+            font-weight: 500;
+            display: inline-block;
+        }
+        .fallback-type {
+            background: #e0e7ff;
+            color: #3730a3;
+            padding: 4px 8px;
+            border-radius: 20px;
+            font-size: 11px;
+        }
+        .success-badge {
+            color: #2e7d32;
+            background: #e8f5e9;
+            padding: 4px 10px;
+            border-radius: 30px;
+            font-size: 11px;
+            display: inline-block;
+        }
+        .fail-badge {
+            color: #c62828;
+            background: #ffebee;
+            padding: 4px 10px;
+            border-radius: 30px;
+            font-size: 11px;
+        }
+        .time-warning { color: #ed6c02; font-weight: 500; }
+        .time-critical { color: #d32f2f; font-weight: 500; }
+
+        /* 分页 */
+        .pagination {
+            padding: 16px 20px;
+            border-top: 1px solid #e9edf2;
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            align-items: center;
+        }
+        .pagination button {
+            background: #f0f4fa;
+            border: 1px solid #d0ddec;
+            border-radius: 20px;
+            padding: 5px 12px;
+            cursor: pointer;
+        }
+
+        /* 模态框 */
+        .modal-mask {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        .modal-container {
+            background: white;
+            width: 700px;
+            max-width: 90%;
+            max-height: 85%;
+            border-radius: 28px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 20px 35px -10px rgba(0, 0, 0, 0.2);
+        }
+        .modal-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid #e9edf2;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+        }
+        .modal-body {
+            padding: 20px 24px;
+            overflow-y: auto;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+        .detail-grid {
+            display: grid;
+            grid-template-columns: 140px 1fr;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        .detail-label {
+            font-weight: 600;
+            color: #4b6f94;
+        }
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 22px;
+            cursor: pointer;
+        }
+        .toast-msg {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1e3a6b;
+            color: white;
+            padding: 8px 20px;
+            border-radius: 40px;
+            font-size: 13px;
+            z-index: 1100;
+            animation: fadeOut 2s forwards;
+        }
+        @keyframes fadeOut {
+            0% { opacity: 1; }
+            70% { opacity: 1; }
+            100% { opacity: 0; visibility: hidden; }
+        }
+    </style>
+</head>
+<body>
+<div class="log-dashboard">
+    <div class="header">
+        <div class="logo-area"><div class="logo-icon"><i class="fas fa-chart-line"></i></div><span class="logo-text">信托智数 · 日志管理中心</span></div>
+        <div class="avatar"></div>
+    </div>
+    <div class="main-content">
+        <!-- 筛选栏 -->
+        <div class="filter-bar">
+            <div class="filter-row">
+                <div class="filter-item"><label>时间范围</label><select id="timeRange"><option value="today">今日</option><option value="week">近7天</option><option value="month">近30天</option><option value="custom">自定义</option></select></div>
+                <div class="filter-item"><label>用户ID</label><input type="text" id="userId" placeholder="输入用户ID"></div>
+                <div class="filter-item"><label>用户角色</label><select id="userRole"><option value="">全部</option><option value="普通用户">普通用户</option><option value="团队管理者">团队管理者</option><option value="数据分析岗">数据分析岗</option></select></div>
+                <div class="filter-item"><label>问题关键词</label><input type="text" id="keyword" placeholder="持仓 / 1000万"></div>
+                <div class="filter-item"><label>兜底类型</label><select id="fallbackType"><option value="">全部</option><option value="A类">A类-非问数</option><option value="B类">B类-非场景</option><option value="C类">C类-图表不可用</option><option value="D类">D类-无结果</option><option value="E类">E类-权限不足</option><option value="F类">F类-系统异常</option></select></div>
+                <div class="filter-item"><label>识别场景</label><select id="scene"><option value="">全部</option><option value="客户">客户</option><option value="持仓">持仓</option><option value="交易">交易</option><option value="产品">产品</option></select></div>
+                <div class="filter-actions"><button class="btn-primary" id="searchBtn"><i class="fas fa-search"></i> 查询</button><button class="btn-secondary" id="resetBtn">重置</button></div>
+            </div>
+            <div style="display: flex; justify-content: flex-end;"><button class="btn-export" id="exportBtn"><i class="fas fa-download"></i> 导出Excel</button></div>
+        </div>
+
+        <!-- 日志表格 -->
+        <div class="log-table-container">
+            <div class="table-header"><span><i class="fas fa-list"></i> 操作日志</span><span>共 <span id="totalCount">0</span> 条记录</span></div>
+            <div style="overflow-x: auto;">
+                <table class="log-table" id="logTable">
+                    <thead>
+                        <tr><th>操作时间</th><th>用户ID</th><th>用户角色</th><th>查询问题</th><th>识别场景</th><th>是否兜底</th><th>兜底类型</th><th>响应时间</th><th>状态</th></tr>
+                    </thead>
+                    <tbody id="logTableBody"></tbody>
+                </table>
+            </div>
+            <div class="pagination" id="pagination"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // 模拟日志数据（符合PRD字段）
+    let allLogs = [];
+    const sampleUsers = ["zhangwei", "lili", "wangfang", "zhaosi", "chenmin"];
+    const sampleRoles = ["普通用户", "团队管理者", "数据分析岗"];
+    const sampleScenes = ["客户", "持仓", "交易", "产品"];
+    const sampleQuestions = ["持仓超过1000万的客户有哪些？", "查询本周过生日的客户", "风险等级分布", "赵司的总持仓是多少？", "近30天到期产品", "合格投资者即将过期"];
+    const sampleFallbackTypes = ["", "A类", "B类", "C类", "D类"];
+
+    for (let i = 1; i <= 68; i++) {
+        const isFallback = Math.random() > 0.7;
+        const fallbackType = isFallback ? sampleFallbackTypes[Math.floor(Math.random() * sampleFallbackTypes.length)] : "";
+        const question = sampleQuestions[Math.floor(Math.random() * sampleQuestions.length)];
+        const respTime = Math.floor(Math.random() * 12000);
+        allLogs.push({
+            id: `LOG-20260507-${String(i).padStart(6,'0')}`,
+            userId: sampleUsers[Math.floor(Math.random() * sampleUsers.length)],
+            userRole: sampleRoles[Math.floor(Math.random() * sampleRoles.length)],
+            operationTime: `2026-05-0${Math.floor(Math.random()*9)+1} ${Math.floor(Math.random()*24)}:${Math.floor(Math.random()*60)}:${Math.floor(Math.random()*60)}`,
+            question: question,
+            scene: sampleScenes[Math.floor(Math.random() * sampleScenes.length)],
+            isFallback: isFallback,
+            fallbackType: fallbackType,
+            responseTime: respTime,
+            success: Math.random() > 0.1,
+            failReason: "",
+            clientIp: `10.${Math.floor(Math.random()*255)}.${Math.floor(Math.random()*255)}.${Math.floor(Math.random()*255)}`,
+            entities: ["客户名称", "持仓金额"],
+            indicators: ["持仓规模"],
+            params: ["阈值>1000万"],
+            hitPrompts: "持仓(持有、存量)",
+            originalSql: "SELECT cust_name, holding_amount FROM holdings WHERE holding_amount > 10000000",
+            permissionInjected: "增加管户过滤: cust_id IN (SELECT cust_id FROM user_cust_relation WHERE user_id = '当前用户')",
+            finalSql: "SELECT cust_name, holding_amount FROM holdings WHERE holding_amount > 10000000 AND cust_id IN (SELECT cust_id FROM user_cust_relation WHERE user_id = 'zhangwei')",
+            answerLogic: "根据SQL返回3条记录，格式化输出为客户清单表格",
+            displayFormat: "表格",
+            triggerReason: isFallback ? "饼图最多支持6个分类" : "",
+            dataCount: Math.floor(Math.random() * 50) + 1,
+            userFeedback: Math.random() > 0.8 ? "有用" : (Math.random() > 0.9 ? "无用" : "未反馈")
+        });
+    }
+    allLogs.sort((a,b)=>b.operationTime.localeCompare(a.operationTime));
+
+    let filteredLogs = [...allLogs];
+    let currentPage = 1;
+    const pageSize = 20;
+
+    function renderTable() {
+        const start = (currentPage-1)*pageSize;
+        const pageData = filteredLogs.slice(start, start+pageSize);
+        const tbody = document.getElementById('logTableBody');
+        tbody.innerHTML = pageData.map(log => `
+            <tr data-id="${log.id}">
+                <td>${log.operationTime}</td><td>${log.userId}</td><td>${log.userRole}</td>
+                <td style="max-width:200px; overflow:hidden; text-overflow:ellipsis;">${log.question.length>25?log.question.substring(0,25)+'…':log.question}</td>
+                <td>${log.scene}</td>
+                <td>${log.isFallback ? '<span class="fallback-badge">是</span>' : '<span style="color:#6c86a3;">否</span>'}</td>
+                <td>${log.fallbackType ? `<span class="fallback-type">${log.fallbackType}</span>` : '-'}</td>
+                <td class="${log.responseTime>3000 ? (log.responseTime>10000 ? 'time-critical' : 'time-warning') : ''}">${log.responseTime}ms</td>
+                <td>${log.success ? '<span class="success-badge">成功</span>' : '<span class="fail-badge">失败</span>'}</td>
+            </tr>
+        `).join('');
+        document.getElementById('totalCount').innerText = filteredLogs.length;
+        renderPagination();
+    }
+
+    function renderPagination() {
+        const totalPages = Math.ceil(filteredLogs.length / pageSize);
+        const container = document.getElementById('pagination');
+        if(totalPages <= 1) { container.innerHTML = ''; return; }
+        let html = `<button ${currentPage===1?'disabled':''} id="prevPage"><i class="fas fa-chevron-left"></i> 上一页</button>
+                    <span>第 ${currentPage} / ${totalPages} 页</span>
+                    <button ${currentPage===totalPages?'disabled':''} id="nextPage">下一页 <i class="fas fa-chevron-right"></i></button>`;
+        container.innerHTML = html;
+        document.getElementById('prevPage')?.addEventListener('click',()=>{if(currentPage>1){currentPage--;renderTable();}});
+        document.getElementById('nextPage')?.addEventListener('click',()=>{if(currentPage<totalPages){currentPage++;renderTable();}});
+    }
+
+    function filterLogs() {
+        const timeVal = document.getElementById('timeRange').value;
+        const userId = document.getElementById('userId').value.trim().toLowerCase();
+        const role = document.getElementById('userRole').value;
+        const keyword = document.getElementById('keyword').value.trim().toLowerCase();
+        const fbType = document.getElementById('fallbackType').value;
+        const scene = document.getElementById('scene').value;
+        filteredLogs = allLogs.filter(log => {
+            if(userId && !log.userId.toLowerCase().includes(userId)) return false;
+            if(role && log.userRole !== role) return false;
+            if(keyword && !log.question.toLowerCase().includes(keyword)) return false;
+            if(fbType && log.fallbackType !== fbType) return false;
+            if(scene && log.scene !== scene) return false;
+            return true;
+        });
+        currentPage = 1;
+        renderTable();
+    }
+
+    document.getElementById('searchBtn').addEventListener('click', filterLogs);
+    document.getElementById('resetBtn').addEventListener('click', ()=>{
+        document.getElementById('timeRange').value = 'week';
+        document.getElementById('userId').value = '';
+        document.getElementById('userRole').value = '';
+        document.getElementById('keyword').value = '';
+        document.getElementById('fallbackType').value = '';
+        document.getElementById('scene').value = '';
+        filterLogs();
+    });
+
+    // 详情弹窗
+    let currentDetailLog = null;
+    function showDetail(log) {
+        currentDetailLog = log;
+        const modalHtml = `
+            <div class="modal-mask" id="detailModal">
+                <div class="modal-container">
+                    <div class="modal-header"><span>📋 日志详情 - ${log.id}</span><button class="close-modal" id="closeModalBtn">&times;</button></div>
+                    <div class="modal-body">
+                        <div class="detail-grid"><span class="detail-label">用户ID</span><span>${log.userId}</span></div>
+                        <div class="detail-grid"><span class="detail-label">用户角色</span><span>${log.userRole}</span></div>
+                        <div class="detail-grid"><span class="detail-label">操作时间</span><span>${log.operationTime}</span></div>
+                        <div class="detail-grid"><span class="detail-label">客户端IP</span><span>${log.clientIp}</span></div>
+                        <div class="detail-grid"><span class="detail-label">查询问题</span><span>${log.question}</span></div>
+                        <div class="detail-grid"><span class="detail-label">识别场景</span><span>${log.scene}</span></div>
+                        <div class="detail-grid"><span class="detail-label">识别实体</span><span>${log.entities.join(', ')}</span></div>
+                        <div class="detail-grid"><span class="detail-label">识别指标/参数</span><span>${log.indicators.join(', ')} / ${log.params.join(', ')}</span></div>
+                        <div class="detail-grid"><span class="detail-label">命中提示词</span><span>${log.hitPrompts}</span></div>
+                        <div class="detail-grid"><span class="detail-label">原始SQL</span><span><pre style="background:#f2f5f9;padding:8px;border-radius:12px;overflow-x:auto;font-size:11px;">${log.originalSql}</pre></span></div>
+                        <div class="detail-grid"><span class="detail-label">权限注入</span><span>${log.permissionInjected}</span></div>
+                        <div class="detail-grid"><span class="detail-label">最终SQL</span><span><pre style="background:#f2f5f9;padding:8px;border-radius:12px;font-size:11px;">${log.finalSql}</pre></span></div>
+                        <div class="detail-grid"><span class="detail-label">答案生成</span><span>${log.answerLogic}</span></div>
+                        <div class="detail-grid"><span class="detail-label">展示形式</span><span>${log.displayFormat}</span></div>
+                        <div class="detail-grid"><span class="detail-label">是否兜底</span><span>${log.isFallback ? '是' : '否'} ${log.fallbackType ? `(${log.fallbackType})` : ''}</span></div>
+                        <div class="detail-grid"><span class="detail-label">触发原因</span><span>${log.triggerReason || '-'}</span></div>
+                        <div class="detail-grid"><span class="detail-label">返回数据量</span><span>${log.dataCount}条</span></div>
+                        <div class="detail-grid"><span class="detail-label">响应时间</span><span>${log.responseTime}ms</span></div>
+                        <div class="detail-grid"><span class="detail-label">状态</span><span>${log.success ? '成功' : '失败'}</span></div>
+                        <div class="detail-grid"><span class="detail-label">用户反馈</span><span>${log.userFeedback}</span></div>
+                    </div>
+                </div>
+            </div>
+        `;
+        document.body.insertAdjacentHTML('beforeend', modalHtml);
+        document.getElementById('closeModalBtn')?.addEventListener('click', ()=>document.getElementById('detailModal')?.remove());
+        document.getElementById('detailModal')?.addEventListener('click', (e)=>{if(e.target === document.getElementById('detailModal')) document.getElementById('detailModal')?.remove();});
+    }
+
+    document.getElementById('logTableBody')?.addEventListener('click', (e) => {
+        const row = e.target.closest('tr');
+        if(row && row.dataset.id) {
+            const log = filteredLogs.find(l => l.id === row.dataset.id);
+            if(log) showDetail(log);
+        }
+    });
+
+    // 导出Excel (模拟)
+    document.getElementById('exportBtn').addEventListener('click', () => {
+        const exportData = filteredLogs.map(l => ({
+            '日志ID': l.id, '用户ID': l.userId, '用户角色': l.userRole, '操作时间': l.operationTime,
+            '查询问题': l.question, '识别场景': l.scene, '是否兜底': l.isFallback ? '是' : '否', '兜底类型': l.fallbackType,
+            '响应时间(ms)': l.responseTime, '状态': l.success ? '成功' : '失败', '返回数据量': l.dataCount
+        }));
+        let csvContent = "\uFEFF" + Object.keys(exportData[0]).join(",") + "\n";
+        csvContent += exportData.map(row => Object.values(row).map(v => `"${v}"`).join(",")).join("\n");
+        const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = `日志导出_${new Date().toISOString().slice(0,19)}.csv`;
+        link.click();
+        showToast("导出成功");
+    });
+
+    function showToast(msg){ let div=document.createElement('div'); div.className='toast-msg'; div.innerText=msg; document.body.appendChild(div); setTimeout(()=>div.remove(),2000); }
+
+    filterLogs();
+</script>
+</body>
+</html>
