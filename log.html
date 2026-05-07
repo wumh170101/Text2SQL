@@ -74,6 +74,45 @@
             background-size: 55%;
             background-position: center 55%;
             background-repeat: no-repeat;
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+        .avatar:hover {
+            transform: scale(1.02);
+            background-color: #1f4870;
+        }
+        /* 头像下拉菜单 */
+        .avatar-menu {
+            position: absolute;
+            top: 76px;
+            right: 32px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+            min-width: 160px;
+            padding: 8px 0;
+            display: none;
+            z-index: 1000;
+            border: 1px solid #eef2f9;
+        }
+        .avatar-menu.show {
+            display: block;
+        }
+        .menu-item {
+            padding: 10px 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            color: #333;
+            font-size: 14px;
+        }
+        .menu-item:hover {
+            background: #f5f7fa;
+        }
+        .menu-item i {
+            width: 16px;
+            color: #666;
         }
 
         /* 主体 */
@@ -327,8 +366,14 @@
 <body>
 <div class="log-dashboard">
     <div class="header">
-        <div class="logo-area"><div class="logo-icon"><i class="fas fa-chart-line"></i></div><span class="logo-text">信托智数 · 日志管理中心</span></div>
-        <div class="avatar"></div>
+        <div class="logo-area"><div class="logo-icon"><i class="fas fa-file-alt"></i></div><span class="logo-text">日志管理</span></div>
+        <div class="avatar" id="avatarIcon"></div>
+        <!-- 头像下拉菜单 -->
+        <div class="avatar-menu" id="avatarMenu">
+            <div class="menu-item" id="menuAgent"><i class="fas fa-robot"></i> Agent</div>
+            <div class="menu-item" id="menuLog"><i class="fas fa-file-alt"></i> 日志管理</div>
+            <div class="menu-item" id="menuPrompt"><i class="fas fa-tags"></i> 提示词管理</div>
+        </div>
     </div>
     <div class="main-content">
         <!-- 筛选栏 -->
@@ -362,6 +407,38 @@
 </div>
 
 <script>
+    // ---------- 头像下拉菜单功能 ----------
+    document.addEventListener('DOMContentLoaded', function() {
+        const avatarIcon = document.getElementById('avatarIcon');
+        const avatarMenu = document.getElementById('avatarMenu');
+        
+        // 点击头像切换菜单显示/隐藏
+        avatarIcon.addEventListener('click', function(e) {
+            e.stopPropagation();
+            avatarMenu.classList.toggle('show');
+        });
+        
+        // 点击页面其他区域关闭菜单
+        document.addEventListener('click', function(e) {
+            if (!avatarMenu.contains(e.target) && !avatarIcon.contains(e.target)) {
+                avatarMenu.classList.remove('show');
+            }
+        });
+        
+        // 菜单点击事件
+        document.getElementById('menuAgent').addEventListener('click', function() {
+            window.location.href = 'index.html';
+        });
+        
+        document.getElementById('menuLog').addEventListener('click', function() {
+            window.location.href = 'log.html';
+        });
+        
+        document.getElementById('menuPrompt').addEventListener('click', function() {
+            window.location.href = 'prompt.html';
+        });
+    });
+
     // 模拟日志数据（符合PRD字段）
     let allLogs = [];
     const sampleUsers = ["zhangwei", "lili", "wangfang", "zhaosi", "chenmin"];

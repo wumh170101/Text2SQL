@@ -71,6 +71,28 @@
             color: #152c42;
             letter-spacing: -0.3px;
         }
+        /* 新建对话按钮 */
+        .new-chat-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 10px 18px;
+            background: linear-gradient(135deg, #2b5280, #1f4a7a);
+            color: white;
+            border: none;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .new-chat-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(43, 82, 128, 0.35);
+        }
+        .new-chat-btn:active {
+            transform: translateY(0);
+        }
         .avatar {
             width: 44px;
             height: 44px;
@@ -80,6 +102,45 @@
             background-size: 55%;
             background-position: center 55%;
             background-repeat: no-repeat;
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+        .avatar:hover {
+            transform: scale(1.02);
+            background-color: #1f4870;
+        }
+        /* 头像下拉菜单 */
+        .avatar-menu {
+            position: absolute;
+            top: 76px;
+            right: 32px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+            min-width: 160px;
+            padding: 8px 0;
+            display: none;
+            z-index: 1000;
+            border: 1px solid #eef2f9;
+        }
+        .avatar-menu.show {
+            display: block;
+        }
+        .menu-item {
+            padding: 10px 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            color: #333;
+            font-size: 14px;
+        }
+        .menu-item:hover {
+            background: #f5f7fa;
+        }
+        .menu-item i {
+            width: 16px;
+            color: #666;
         }
 
         .main-layout {
@@ -234,6 +295,18 @@
 
         .user-message-wrapper:hover .copy-question-icon {
             display: flex;
+        }
+
+        .message-time {
+            font-size: 11px;
+            color: #9cb5d4;
+            margin-bottom: 6px;
+            display: none;
+        }
+
+        .user-message-wrapper:hover .message-time,
+        .bot-response:hover .message-time {
+            display: block;
         }
 
         .bot-response {
@@ -681,7 +754,13 @@
             </div>
             <span class="logo-text"></span>
         </div>
-        <div class="avatar"></div>
+        <div class="avatar" id="avatarIcon"></div>
+        <!-- 头像下拉菜单 -->
+        <div class="avatar-menu" id="avatarMenu">
+            <div class="menu-item" id="menuAgent"><i class="fas fa-robot"></i> Agent</div>
+            <div class="menu-item" id="menuLog"><i class="fas fa-file-alt"></i> 日志管理</div>
+            <div class="menu-item" id="menuPrompt"><i class="fas fa-tags"></i> 提示词管理</div>
+        </div>
     </div>
     <div class="main-layout">
         <div class="history-panel collapsed" id="historyPanel">
@@ -695,6 +774,7 @@
             </div>
             <div class="message-flow" id="messageFlow"></div>
             <div class="input-area">
+                <button class="new-chat-btn" id="newChatBtn"><i class="fas fa-plus"></i> 新建对话</button>
                 <div class="input-wrapper">
                     <input type="text" id="questionInput" placeholder="例如：查询本周过生日的客户 / 客户持仓总金额排名...">
                     <button id="sendBtn"><i class="fas fa-arrow-up"></i></button>
@@ -715,9 +795,57 @@
             <div class="add-prompt-btn" id="addPromptBtn">+ 新增提示词</div>
         </div>
     </div>
+    <div style="text-align: center; padding: 12px; background: #f0f5fc; border-top: 1px solid #e2eaf5; font-size: 12px; color: #6b89a8;">
+        ⚠️ 内容由AI生成，请仔细甄别
+    </div>
 </div>
 
 <script>
+    // ---------- 头像下拉菜单功能 ----------
+    document.addEventListener('DOMContentLoaded', function() {
+        const avatarIcon = document.getElementById('avatarIcon');
+        const avatarMenu = document.getElementById('avatarMenu');
+        
+        // 点击头像切换菜单显示/隐藏
+        avatarIcon.addEventListener('click', function(e) {
+            e.stopPropagation();
+            avatarMenu.classList.toggle('show');
+        });
+        
+        // 点击页面其他区域关闭菜单
+        document.addEventListener('click', function(e) {
+            if (!avatarMenu.contains(e.target) && !avatarIcon.contains(e.target)) {
+                avatarMenu.classList.remove('show');
+            }
+        });
+        
+        // 菜单点击事件
+        document.getElementById('menuAgent').addEventListener('click', function() {
+            window.location.href = 'index.html';
+        });
+        
+        document.getElementById('menuLog').addEventListener('click', function() {
+            window.location.href = 'log.html';
+        });
+        
+        document.getElementById('menuPrompt').addEventListener('click', function() {
+            window.location.href = 'prompt.html';
+        });
+
+        // 新建对话功能
+        document.getElementById('newChatBtn').addEventListener('click', function() {
+            const messageFlow = document.getElementById('messageFlow');
+            if (messageFlow) {
+                messageFlow.innerHTML = '';
+            }
+            const input = document.getElementById('questionInput');
+            if (input) {
+                input.value = '';
+            }
+            showToast('已新建对话');
+        });
+    });
+
     // ======================= MOCK 数据区域 =======================
     // 1. 提示词原始数据 (包含实体/指标/参数)
     let promptsData = [
@@ -823,6 +951,15 @@
         }
     }
 
+    function insertPromptToInput(term) {
+        const input = document.getElementById('questionInput');
+        if(input) {
+            input.value += (input.value ? ' ' : '') + term;
+            input.focus();
+            showToast('已插入: ' + term);
+        }
+    }
+
     function renderPrompts() {
         let filtered = promptsData.filter(p => p.scenes.some(s => selectedScenes.includes(s)));
         if(searchKeyword.trim()){ let kw=searchKeyword.toLowerCase(); filtered = filtered.filter(p => p.term.toLowerCase().includes(kw) || p.synonyms.some(s=>s.toLowerCase().includes(kw))); }
@@ -832,7 +969,7 @@
         if(entities.length===0 && indicators.length===0 && params.length===0){ container.innerHTML='<div class="empty-tip">暂无匹配提示词，点击“+新增”添加</div>'; return; }
         const renderCards = (list) => list.map(p => `
             <div class="prompt-card" data-id="${p.id}">
-                <div class="prompt-term">📌 ${escapeHtml(p.term)}</div>
+                <div class="prompt-term" data-term="${escapeHtml(p.term)}" title="点击插入到输入框">📌 ${escapeHtml(p.term)}</div>
                 <div class="card-actions">
                     <i class="fas fa-edit edit-prompt-icon" data-id="${p.id}" title="编辑"></i>
                     <i class="fas fa-trash-alt delete-prompt-icon" data-id="${p.id}" title="删除"></i>
@@ -849,6 +986,7 @@
         document.querySelectorAll('.type-header').forEach(h=>h.addEventListener('click',(e)=>{ let t=h.getAttribute('data-type'); if(t){ collapsedState[t]=!collapsedState[t]; renderPrompts(); } }));
         document.querySelectorAll('.edit-prompt-icon').forEach(btn => btn.addEventListener('click',(e)=>{ let id=parseInt(btn.getAttribute('data-id')); let prompt = promptsData.find(p=>p.id===id); if(prompt) editPromptItem(prompt); }));
         document.querySelectorAll('.delete-prompt-icon').forEach(btn => btn.addEventListener('click',(e)=>{ let id=parseInt(btn.getAttribute('data-id')); deletePromptItem(id); }));
+        document.querySelectorAll('.prompt-term').forEach(termEl => termEl.addEventListener('click',(e)=>{ let term=termEl.getAttribute('data-term'); if(term) insertPromptToInput(term); }));
     }
 
     function renderSceneSelect(){
@@ -882,21 +1020,34 @@
     }
 
     function renderAnswerCard(ans, container, questionText){
-        container.innerHTML = '';
+        const timeStr = new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
+        container.innerHTML = `<div class="message-time">${timeStr}</div>`;
         const stepsDiv = document.createElement('div'); stepsDiv.className='thinking-steps';
         const titleRow = document.createElement('div');
-        titleRow.style.cssText = 'font-weight: 600; color: #1f4870; padding: 8px 18px; background: #edf4fe; border-radius: 18px 18px 0 0;';
-        titleRow.innerText = '🧠 思考过程';
+        titleRow.style.cssText = 'font-weight: 600; color: #1f4870; padding: 8px 18px; background: #edf4fe; border-radius: 18px; display: flex; justify-content: space-between; align-items: center; cursor: pointer;';
+        titleRow.innerHTML = '<span><i class="fas fa-chevron-down"></i> 思考过程</span><span id="toggleAllSteps" style="font-size: 12px; color: #3466a8;">展开</span>';
         stepsDiv.appendChild(titleRow);
-        stepsDiv.innerHTML += `<div class="step"><div class="step-header" onclick="this.parentElement.classList.toggle('collapsed')"><i class="fas fa-chevron-down"></i> 🔍 意图识别</div><div class="step-content">${ans.thinking.intent}</div></div>
-                              <div class="step"><div class="step-header" onclick="this.parentElement.classList.toggle('collapsed')"><i class="fas fa-chevron-down"></i> 📋 SQL查询</div><div class="step-content"><div class="sql-code">${ans.thinking.sql}</div></div></div>
-                              <div class="step"><div class="step-header" onclick="this.parentElement.classList.toggle('collapsed')"><i class="fas fa-chevron-down"></i> 📄 答案生成</div><div class="step-content">${ans.thinking.answerGen}</div></div>`;
+        const stepsContent = document.createElement('div'); stepsContent.className='steps-content';
+        stepsContent.style.display = 'none';
+        stepsContent.innerHTML = `<div class="step"><div class="step-header" onclick="this.parentElement.classList.toggle('collapsed')"><i class="fas fa-chevron-right"></i> 意图识别</div><div class="step-content">${ans.thinking.intent}</div></div>
+                              <div class="step"><div class="step-header" onclick="this.parentElement.classList.toggle('collapsed')"><i class="fas fa-chevron-right"></i> SQL查询</div><div class="step-content"><div class="sql-code">${ans.thinking.sql}</div></div></div>
+                              <div class="step"><div class="step-header" onclick="this.parentElement.classList.toggle('collapsed')"><i class="fas fa-chevron-right"></i> 答案生成</div><div class="step-content">${ans.thinking.answerGen}</div></div>`;
+        stepsDiv.appendChild(stepsContent);
         container.appendChild(stepsDiv);
         
-        setTimeout(() => {
-            const steps = stepsDiv.querySelectorAll('.step');
-            steps.forEach(step => step.classList.add('collapsed'));
-        }, 1500);
+        const toggleBtn = document.getElementById('toggleAllSteps');
+        let isExpanded = false;
+        const toggleSteps = () => {
+            isExpanded = !isExpanded;
+            stepsContent.style.display = isExpanded ? 'block' : 'none';
+            titleRow.querySelector('i').className = isExpanded ? 'fas fa-chevron-up' : 'fas fa-chevron-down';
+            toggleBtn.innerHTML = isExpanded ? '收起' : '展开';
+        };
+        toggleBtn.onclick = (e) => {
+            e.stopPropagation();
+            toggleSteps();
+        };
+        titleRow.onclick = toggleSteps;
         const titleDiv = document.createElement('div'); titleDiv.className='answer-text'; titleDiv.innerText=ans.title; container.appendChild(titleDiv);
         let contentElem;
         if(ans.type === 'table'){
@@ -920,13 +1071,33 @@
             let textDiv = document.createElement('div'); textDiv.innerText=ans.content; textDiv.style.padding='12px 0'; contentElem=textDiv;
         }
         container.appendChild(contentElem);
-        let summary = document.createElement('div'); summary.style.cssText='font-size:13px; color:#4b6f94; margin-top:12px; border-top:1px solid #e2ecf8; padding-top:10px'; summary.innerText = `🔍 ${ans.summary} | 数据截止 ${new Date().toLocaleDateString()}`; container.appendChild(summary);
+        let summary = document.createElement('div'); summary.style.cssText='font-size:13px; color:#4b6f94; margin-top:12px; border-top:1px solid #e2ecf8; padding-top:10px'; summary.innerText = `🔍 ${ans.summary} | 数据截止 ${new Date().toLocaleDateString()} | AI生成内容仅供参考，请仔细甄别`; container.appendChild(summary);
         
         let feedback = document.createElement('div'); feedback.className='feedback-actions';
         const copyBtn = document.createElement('button'); copyBtn.className='feedback-item'; copyBtn.innerHTML='<i class="far fa-copy"></i> 复制答案';
         copyBtn.onclick = () => { let copyText = ans.title + '\n' + (ans.type==='table'? ans.rows.map(r=>r.join('\t')).join('\n'): ans.type==='pie'? Object.entries(ans.data).map(([k,v])=>`${k}: ${v}人`).join('\n'): ans.type==='bar'? ans.labels.map((l,i)=>`${l}: ${ans.values[i]}w`).join('\n'): ans.content); navigator.clipboard.writeText(copyText); showToast('已复制'); };
-        const exportBtn = document.createElement('button'); exportBtn.className='feedback-item'; exportBtn.innerHTML='<i class="fas fa-camera"></i> 导出结果';
-        exportBtn.onclick = async () => { let btns = container.querySelectorAll('.feedback-item'); btns.forEach(btn=>btn.style.visibility='hidden'); try{ let canvas=await html2canvas(container,{scale:1.6,backgroundColor:'#ffffff'}); let link=document.createElement('a'); link.download=`问数结果.png`; link.href=canvas.toDataURL(); link.click(); }finally{ btns.forEach(btn=>btn.style.visibility='visible'); } };
+        const exportBtn = document.createElement('button'); exportBtn.className='feedback-item'; exportBtn.innerHTML='<i class="fas fa-file-excel"></i> 导出Excel';
+        exportBtn.onclick = () => {
+            let excelContent = `\uFEFF${ans.title}\n`;
+            if(ans.type === 'table'){
+                excelContent += ans.columns.join('\t') + '\n';
+                ans.rows.forEach(row => excelContent += row.join('\t') + '\n');
+            } else if(ans.type === 'pie'){
+                Object.entries(ans.data).forEach(([k,v]) => excelContent += `${k}\t${v}\n`);
+            } else if(ans.type === 'bar'){
+                excelContent += '客户\t金额(万)\n';
+                ans.labels.forEach((l,i) => excelContent += `${l}\t${ans.values[i]}\n`);
+            } else {
+                excelContent += ans.content.replace(/\n/g, '\r\n');
+            }
+            excelContent += `\n${ans.summary}`;
+            const blob = new Blob([excelContent], { type: 'application/vnd.ms-excel;charset=utf-8' });
+            const link = document.createElement('a');
+            link.download = `问数结果.xls`;
+            link.href = URL.createObjectURL(blob);
+            link.click();
+            URL.revokeObjectURL(link.href);
+        };
         const like = document.createElement('button'); like.className='feedback-item'; like.innerHTML='<i class="far fa-thumbs-up"></i> 有用'; like.onclick=()=>showToast('感谢反馈');
         const dislike = document.createElement('button'); dislike.className='feedback-item'; dislike.innerHTML='<i class="far fa-thumbs-down"></i> 无用'; dislike.onclick=()=>showToast('已记录');
         const regen = document.createElement('button'); regen.className='feedback-item'; regen.innerHTML='<i class="fas fa-rotate-right"></i> 重新生成'; regen.onclick=()=>{ let newAns=generateFullAnswer(questionText); renderAnswerCard(newAns, container, questionText); };
@@ -944,11 +1115,14 @@
 
     function loadConversation(question){
         const flow = document.getElementById('messageFlow');
+        const now = new Date();
+        const timeStr = now.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
         // 添加用户气泡
         const userDiv = document.createElement('div'); userDiv.className='user-message-wrapper';
-        userDiv.innerHTML = `<div class="user-message">${escapeHtml(question)}<div class="copy-question-icon" onclick="event.stopPropagation(); navigator.clipboard.writeText('${escapeHtml(question)}'); showToast('已复制问题');"><i class="far fa-copy"></i> 复制</div></div>`;
+        userDiv.innerHTML = `<div class="message-time">${timeStr}</div><div class="user-message">${escapeHtml(question)}<div class="copy-question-icon" onclick="event.stopPropagation(); navigator.clipboard.writeText('${escapeHtml(question)}'); showToast('已复制问题');"><i class="far fa-copy"></i> 复制</div></div>`;
         flow.appendChild(userDiv);
         const botDiv = document.createElement('div'); botDiv.className='bot-response';
+        botDiv.innerHTML = `<div class="message-time">${timeStr}</div>`;
         flow.appendChild(botDiv);
         const ans = generateFullAnswer(question);
         renderAnswerCard(ans, botDiv, question);
