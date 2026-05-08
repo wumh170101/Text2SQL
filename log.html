@@ -81,6 +81,7 @@
             transform: scale(1.02);
             background-color: #1f4870;
         }
+
         /* 头像下拉菜单 */
         .avatar-menu {
             position: absolute;
@@ -269,6 +270,20 @@
             border-radius: 30px;
             font-size: 11px;
         }
+        .feedback-positive {
+            color: #2e7d32;
+            background: #e8f5e9;
+            padding: 4px 10px;
+            border-radius: 30px;
+            font-size: 11px;
+        }
+        .feedback-negative {
+            color: #c62828;
+            background: #ffebee;
+            padding: 4px 10px;
+            border-radius: 30px;
+            font-size: 11px;
+        }
         .time-warning { color: #ed6c02; font-weight: 500; }
         .time-critical { color: #d32f2f; font-weight: 500; }
 
@@ -382,12 +397,13 @@
                 <div class="filter-item"><label>时间范围</label><select id="timeRange"><option value="today">今日</option><option value="week">近7天</option><option value="month">近30天</option><option value="custom">自定义</option></select></div>
                 <div class="filter-item"><label>用户ID</label><input type="text" id="userId" placeholder="输入用户ID"></div>
                 <div class="filter-item"><label>用户角色</label><select id="userRole"><option value="">全部</option><option value="普通用户">普通用户</option><option value="团队管理者">团队管理者</option><option value="数据分析岗">数据分析岗</option></select></div>
-                <div class="filter-item"><label>问题关键词</label><input type="text" id="keyword" placeholder="持仓 / 1000万"></div>
+                <div class="filter-item"><label>是否兜底</label><select id="isFallback"><option value="">全部</option><option value="yes">是</option><option value="no">否</option></select></div>
                 <div class="filter-item"><label>兜底类型</label><select id="fallbackType"><option value="">全部</option><option value="A类">A类-非问数</option><option value="B类">B类-非场景</option><option value="C类">C类-图表不可用</option><option value="D类">D类-无结果</option><option value="E类">E类-权限不足</option><option value="F类">F类-系统异常</option></select></div>
+                <div class="filter-item"><label>用户反馈</label><select id="userFeedback"><option value="">全部</option><option value="有用">有用</option><option value="无用">无用</option><option value="未反馈">未反馈</option></select></div>
                 <div class="filter-item"><label>识别场景</label><select id="scene"><option value="">全部</option><option value="客户">客户</option><option value="持仓">持仓</option><option value="交易">交易</option><option value="产品">产品</option></select></div>
-                <div class="filter-actions"><button class="btn-primary" id="searchBtn"><i class="fas fa-search"></i> 查询</button><button class="btn-secondary" id="resetBtn">重置</button></div>
+                <div class="filter-item"><label>问题关键词</label><input type="text" id="keyword" placeholder="持仓 / 1000万"></div>
+                <div class="filter-actions"><button class="btn-primary" id="searchBtn"><i class="fas fa-search"></i> 查询</button><button class="btn-secondary" id="resetBtn">重置</button><button class="btn-export" id="exportBtn"><i class="fas fa-download"></i> 导出Excel</button></div>
             </div>
-            <div style="display: flex; justify-content: flex-end;"><button class="btn-export" id="exportBtn"><i class="fas fa-download"></i> 导出Excel</button></div>
         </div>
 
         <!-- 日志表格 -->
@@ -396,7 +412,7 @@
             <div style="overflow-x: auto;">
                 <table class="log-table" id="logTable">
                     <thead>
-                        <tr><th>操作时间</th><th>用户ID</th><th>用户角色</th><th>查询问题</th><th>识别场景</th><th>是否兜底</th><th>兜底类型</th><th>响应时间</th><th>状态</th></tr>
+                        <tr><th>操作时间</th><th>用户ID</th><th>用户角色</th><th>查询问题</th><th>识别场景</th><th>是否兜底</th><th>兜底类型</th><th>用户反馈</th><th>响应时间</th><th>状态</th></tr>
                     </thead>
                     <tbody id="logTableBody"></tbody>
                 </table>
@@ -496,6 +512,7 @@
                 <td>${log.scene}</td>
                 <td>${log.isFallback ? '<span class="fallback-badge">是</span>' : '<span style="color:#6c86a3;">否</span>'}</td>
                 <td>${log.fallbackType ? `<span class="fallback-type">${log.fallbackType}</span>` : '-'}</td>
+                <td>${renderUserFeedback(log.userFeedback)}</td>
                 <td class="${log.responseTime>3000 ? (log.responseTime>10000 ? 'time-critical' : 'time-warning') : ''}">${log.responseTime}ms</td>
                 <td>${log.success ? '<span class="success-badge">成功</span>' : '<span class="fail-badge">失败</span>'}</td>
             </tr>
@@ -516,19 +533,33 @@
         document.getElementById('nextPage')?.addEventListener('click',()=>{if(currentPage<totalPages){currentPage++;renderTable();}});
     }
 
+    function renderUserFeedback(feedback) {
+            if (!feedback) return '<span style="color:#6c86a3;">未反馈</span>';
+            if (feedback === '有用') return '<span class="feedback-positive"><i class="fas fa-thumbs-up"></i> 有用</span>';
+            if (feedback === '无用') return '<span class="feedback-negative"><i class="fas fa-thumbs-down"></i> 无用</span>';
+            return '<span style="color:#6c86a3;">未反馈</span>';
+        }
+
     function filterLogs() {
         const timeVal = document.getElementById('timeRange').value;
         const userId = document.getElementById('userId').value.trim().toLowerCase();
         const role = document.getElementById('userRole').value;
         const keyword = document.getElementById('keyword').value.trim().toLowerCase();
+        const isFallback = document.getElementById('isFallback').value;
         const fbType = document.getElementById('fallbackType').value;
         const scene = document.getElementById('scene').value;
+        const userFeedback = document.getElementById('userFeedback').value;
         filteredLogs = allLogs.filter(log => {
             if(userId && !log.userId.toLowerCase().includes(userId)) return false;
             if(role && log.userRole !== role) return false;
             if(keyword && !log.question.toLowerCase().includes(keyword)) return false;
+            if(isFallback === 'yes' && !log.isFallback) return false;
+            if(isFallback === 'no' && log.isFallback) return false;
             if(fbType && log.fallbackType !== fbType) return false;
             if(scene && log.scene !== scene) return false;
+            if(userFeedback === '有用' && log.userFeedback !== '有用') return false;
+            if(userFeedback === '无用' && log.userFeedback !== '无用') return false;
+            if(userFeedback === '未反馈' && log.userFeedback && log.userFeedback !== '未反馈') return false;
             return true;
         });
         currentPage = 1;

@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>提示词管理 | 智能数据分析平台</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background: #eef2f8;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .dashboard {
+            width: 1600px;
+            max-width: 100%;
+            height: 960px;
+            background: #ffffff;
+            border-radius: 36px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            padding: 16px 28px;
+            background: white;
+            border-bottom: 1px solid #e2eaf5;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-shrink: 0;
+        }
+
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .company-logo {
+            width: 44px;
+            height: 44px;
+            background: linear-gradient(145deg, #0b2b44, #1a4a76);
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+        }
+        .company-logo i {
+            color: white;
+            font-size: 22px;
+        }
+        .logo-text {
+            font-weight: 700;
+            font-size: 22px;
+            color: #152c42;
+            letter-spacing: -0.3px;
+        }
+        .title-area {
+            flex: 1;
+            text-align: center;
+            font-size: 18px;
+            font-weight: 600;
+            color: #152c42;
+        }
+
+        /* 头像和菜单 */
+        .avatar-wrapper {
+            position: relative;
+            cursor: pointer;
+        }
+        .avatar {
+            width: 44px;
+            height: 44px;
+            background: #2b5280;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 2px solid transparent;
+        }
+        .avatar:hover {
+            transform: scale(1.05);
+            border-color: #e2eaf5;
+        }
+        .avatar-menu {
+            position: absolute;
+            top: calc(100% + 8px);
+            right: 0;
+            width: 180px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+            padding: 8px 0;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-8px);
+            transition: all 0.2s;
+            z-index: 100;
+        }
+        .avatar-menu.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+        .menu-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 16px;
+            font-size: 14px;
+            color: #4b6f94;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+        .menu-item:hover {
+            background: #f0f4f8;
+        }
+        .menu-item i {
+            width: 16px;
+            text-align: center;
+        }
+
+        /* 主内容区 */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 24px;
+            overflow-y: auto;
+        }
+
+        /* 工具栏 */
+        .toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .add-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #2b5280, #1f4a7a);
+            color: white;
+            border: none;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .add-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(43, 82, 128, 0.35);
+        }
+        .search-box {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: #f0f4f8;
+            border-radius: 24px;
+            padding: 10px 16px;
+            width: 320px;
+        }
+        .search-box i {
+            color: #8fa9c4;
+        }
+        .search-box input {
+            flex: 1;
+            border: none;
+            background: transparent;
+            outline: none;
+            font-size: 14px;
+            color: #152c42;
+        }
+        .search-box input::placeholder {
+            color: #8fa9c4;
+        }
+
+        /* 场景选择 */
+        .scene-select {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+        .scene-tag {
+            padding: 8px 16px;
+            border-radius: 20px;
+            background: #f0f4f8;
+            color: #4b6f94;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .scene-tag:hover {
+            background: #e2eaf5;
+        }
+        .scene-tag.selected {
+            background: linear-gradient(135deg, #2b5280, #1f4a7a);
+            color: white;
+        }
+
+        /* 类型分区 */
+        .type-section {
+            margin-bottom: 20px;
+            border-radius: 16px;
+            overflow: hidden;
+            border: 1px solid #e2eaf5;
+        }
+        .type-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 20px;
+            background: #f8fafc;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .type-header:hover {
+            background: #f0f4f8;
+        }
+        .type-header span {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 600;
+            color: #152c42;
+            font-size: 15px;
+        }
+        .type-header i:last-child {
+            color: #8fa9c4;
+            transition: transform 0.2s;
+        }
+        .type-header.collapsed i:last-child {
+            transform: rotate(-90deg);
+        }
+        .type-content {
+            padding: 16px;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 12px;
+        }
+
+        /* 提示词卡片 */
+        .prompt-card {
+            background: #fafbfc;
+            border-radius: 12px;
+            padding: 16px;
+            border: 1px solid #eef2f8;
+            transition: all 0.2s;
+        }
+        .prompt-card:hover {
+            border-color: #dce8f7;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        }
+        .prompt-term {
+            font-size: 15px;
+            font-weight: 600;
+            color: #152c42;
+            margin-bottom: 8px;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 6px;
+            display: inline-block;
+        }
+        .prompt-term:hover {
+            background: #e8f0fe;
+            color: #2b5280;
+        }
+        .prompt-meta {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 8px;
+            flex-wrap: wrap;
+        }
+        .meta-item {
+            font-size: 12px;
+            color: #8fa9c4;
+            padding: 3px 8px;
+            background: #f0f4f8;
+            border-radius: 10px;
+        }
+        .prompt-synonyms {
+            font-size: 12px;
+            color: #6b8bae;
+            margin-bottom: 8px;
+        }
+        .prompt-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+        }
+        .action-btn {
+            width: 32px;
+            height: 32px;
+            border: none;
+            border-radius: 8px;
+            background: transparent;
+            color: #8fa9c4;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+        .action-btn:hover {
+            background: #f0f4f8;
+            color: #2b5280;
+        }
+        .action-btn.delete:hover {
+            background: #ffeaea;
+            color: #ff4757;
+        }
+
+        /* 模态框 */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.2s;
+        }
+        .modal-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        .modal {
+            background: white;
+            border-radius: 20px;
+            width: 500px;
+            max-width: 90%;
+            padding: 24px;
+            transform: scale(0.95) translateY(10px);
+            transition: all 0.2s;
+        }
+        .modal-overlay.show .modal {
+            transform: scale(1) translateY(0);
+        }
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        .modal-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #152c42;
+        }
+        .modal-close {
+            width: 32px;
+            height: 32px;
+            border: none;
+            border-radius: 8px;
+            background: #f0f4f8;
+            color: #6b8bae;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-close:hover {
+            background: #e2eaf5;
+        }
+        .modal-body {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .form-group label {
+            font-size: 13px;
+            font-weight: 500;
+            color: #4b6f94;
+        }
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            padding: 10px 14px;
+            border: 1px solid #e2eaf5;
+            border-radius: 10px;
+            font-size: 14px;
+            color: #152c42;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            border-color: #2b5280;
+        }
+        .form-group textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            margin-top: 24px;
+        }
+        .btn-cancel {
+            padding: 10px 20px;
+            border: 1px solid #e2eaf5;
+            border-radius: 10px;
+            background: white;
+            color: #6b8bae;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-cancel:hover {
+            background: #f8fafc;
+        }
+        .btn-confirm {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #2b5280, #1f4a7a);
+            color: white;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-confirm:hover {
+            box-shadow: 0 4px 12px rgba(43, 82, 128, 0.35);
+        }
+
+        /* Toast */
+        #toast {
+            position: fixed;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%) translateY(20px);
+            padding: 12px 24px;
+            background: rgba(21, 44, 66, 0.9);
+            color: white;
+            border-radius: 10px;
+            font-size: 14px;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.2s;
+            z-index: 2000;
+        }
+        #toast.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(-50%) translateY(0);
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard">
+        <div class="header">
+            <div class="logo-area">
+                <div class="company-logo"><i class="fas fa-building-columns"></i></div>
+                <span class="logo-text">提示词管理</span>
+            </div>
+            <div class="avatar-wrapper">
+                <div class="avatar">👤</div>
+                <div class="avatar-menu" id="avatarMenu">
+                    <div class="menu-item" onclick="location.href='index.html'"><i class="fas fa-robot"></i> Agent</div>
+                    <div class="menu-item" onclick="location.href='log.html'"><i class="fas fa-file-alt"></i> 日志管理</div>
+                    <div class="menu-item" onclick="location.href='prompt.html'"><i class="fas fa-tags"></i> 提示词管理</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <!-- 工具栏 -->
+            <div class="toolbar">
+                <button class="add-btn" id="addPromptBtn">
+                    <i class="fas fa-plus"></i> 新增提示词
+                </button>
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="promptSearch" placeholder="搜索术语/同义词">
+                </div>
+            </div>
+
+            <!-- 场景选择 -->
+            <div class="scene-select" id="sceneMultiSelect"></div>
+
+            <!-- 提示词列表 -->
+            <div id="promptListContainer"></div>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div id="toast"></div>
+
+    <!-- 模态框 -->
+    <div class="modal-overlay" id="promptModal">
+        <div class="modal">
+            <div class="modal-header">
+                <span class="modal-title" id="modalTitle">新增提示词</span>
+                <button class="modal-close" id="modalClose"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="editId">
+                <div class="form-group">
+                    <label>归属场景 *</label>
+                    <select id="modalScene">
+                        <option value="客户">客户</option>
+                        <option value="持仓">持仓</option>
+                        <option value="交易">交易</option>
+                        <option value="产品">产品</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>类型 *</label>
+                    <select id="modalType">
+                        <option value="实体">实体</option>
+                        <option value="指标">指标</option>
+                        <option value="参数">参数</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>标准词 *</label>
+                    <input type="text" id="modalTerm" placeholder="请输入标准词">
+                </div>
+                <div class="form-group">
+                    <label>同义词</label>
+                    <input type="text" id="modalSynonyms" placeholder="多个同义词用逗号分隔">
+                </div>
+                <div class="form-group">
+                    <label>映射字段</label>
+                    <input type="text" id="modalMapping" placeholder="数据库字段名">
+                </div>
+                <div class="form-group">
+                    <label>数据口径</label>
+                    <textarea id="modalDetail" placeholder="说明数据统计口径和计算逻辑"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-cancel" id="btnCancel">取消</button>
+                <button class="btn-confirm" id="btnConfirm">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ======== 提示词数据 ========
+        let promptsData = [
+            { id: 1, term: "客户名称", type: "实体", synonyms: ["姓名", "客户名"], mapping: "customer_name", detail: "客户登记的姓名", scenes: ["客户"] },
+            { id: 2, term: "客户ID", type: "实体", synonyms: ["编号", "ID"], mapping: "customer_id", detail: "客户唯一标识", scenes: ["客户", "持仓", "交易"] },
+            { id: 3, term: "持仓金额", type: "指标", synonyms: ["持有金额", "资产规模"], mapping: "holding_amount", detail: "客户当前持仓总金额", scenes: ["持仓"] },
+            { id: 4, term: "风险等级", type: "参数", synonyms: ["风险评级"], mapping: "risk_level", detail: "客户风险承受等级(A/B/C/D)", scenes: ["客户", "产品"] },
+            { id: 5, term: "交易金额", type: "指标", synonyms: ["成交金额"], mapping: "trade_amount", detail: "单笔交易金额", scenes: ["交易"] },
+            { id: 6, term: "产品名称", type: "实体", synonyms: ["产品"], mapping: "product_name", detail: "金融产品名称", scenes: ["产品", "持仓"] },
+            { id: 7, term: "持仓比例", type: "指标", synonyms: ["占比"], mapping: "holding_ratio", detail: "某产品持仓占总资产比例", scenes: ["持仓"] },
+            { id: 8, term: "开户日期", type: "参数", synonyms: ["注册日期"], mapping: "open_date", detail: "客户开户日期", scenes: ["客户"] },
+        ];
+
+        let selectedScenes = ["客户", "持仓", "交易", "产品"];
+        let searchKeyword = "";
+        let collapsedState = { 实体: false, 指标: false, 参数: false };
+
+        // ======== 渲染函数 ========
+        function renderPrompts() {
+            let filtered = promptsData.filter(p => p.scenes.some(s => selectedScenes.includes(s)));
+            if (searchKeyword.trim()) {
+                let kw = searchKeyword.toLowerCase();
+                filtered = filtered.filter(p => 
+                    p.term.toLowerCase().includes(kw) || 
+                    p.synonyms.some(s => s.toLowerCase().includes(kw))
+                );
+            }
+            const entities = filtered.filter(p => p.type === "实体");
+            const indicators = filtered.filter(p => p.type === "指标");
+            const params = filtered.filter(p => p.type === "参数");
+
+            const container = document.getElementById('promptListContainer');
+            if (!container) return;
+
+            const renderCards = (items) => {
+                return items.map(p => `
+                    <div class="prompt-card">
+                        <div class="prompt-term" data-term="${p.term}">${p.term}</div>
+                        <div class="prompt-meta">
+                            <span class="meta-item">${p.type}</span>
+                            ${p.scenes.map(s => `<span class="meta-item">${s}</span>`).join('')}
+                        </div>
+                        ${p.synonyms.length > 0 ? `<div class="prompt-synonyms">同义词: ${p.synonyms.join('、')}</div>` : ''}
+                        <div class="prompt-actions">
+                            <button class="action-btn edit-prompt-icon" data-id="${p.id}" title="编辑"><i class="fas fa-edit"></i></button>
+                            <button class="action-btn delete-prompt-icon" data-id="${p.id}" title="删除"><i class="fas fa-trash"></i></button>
+                        </div>
+                    </div>
+                `).join('');
+            };
+
+            let html = '';
+            if (entities.length > 0) {
+                html += `<div class="type-section"><div class="type-header ${collapsedState.实体?'collapsed':''}" data-type="实体"><span><i class="fas fa-box"></i> 实体 · ${entities.length}</span><i class="fas fa-chevron-down"></i></div><div class="type-content">${renderCards(entities)}</div></div>`;
+            }
+            if (indicators.length > 0) {
+                html += `<div class="type-section"><div class="type-header ${collapsedState.指标?'collapsed':''}" data-type="指标"><span><i class="fas fa-chart-line"></i> 指标 · ${indicators.length}</span><i class="fas fa-chevron-down"></i></div><div class="type-content">${renderCards(indicators)}</div></div>`;
+            }
+            if (params.length > 0) {
+                html += `<div class="type-section"><div class="type-header ${collapsedState.参数?'collapsed':''}" data-type="参数"><span><i class="fas fa-sliders-h"></i> 参数 · ${params.length}</span><i class="fas fa-chevron-down"></i></div><div class="type-content">${renderCards(params)}</div></div>`;
+            }
+            
+            container.innerHTML = html || '<div style="text-align:center; padding:40px; color:#8fa9c4;">暂无符合条件的提示词</div>';
+            
+            document.querySelectorAll('.type-header').forEach(h => {
+                h.addEventListener('click', (e) => {
+                    let t = h.getAttribute('data-type');
+                    if (t) {
+                        collapsedState[t] = !collapsedState[t];
+                        renderPrompts();
+                    }
+                });
+            });
+            
+            document.querySelectorAll('.edit-prompt-icon').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    let id = parseInt(btn.getAttribute('data-id'));
+                    let prompt = promptsData.find(p => p.id === id);
+                    if (prompt) editPromptItem(prompt);
+                });
+            });
+            
+            document.querySelectorAll('.delete-prompt-icon').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    let id = parseInt(btn.getAttribute('data-id'));
+                    deletePromptItem(id);
+                });
+            });
+            
+            document.querySelectorAll('.prompt-term').forEach(termEl => {
+                termEl.addEventListener('click', (e) => {
+                    let term = termEl.getAttribute('data-term');
+                    if (term) {
+                        navigator.clipboard.writeText(term);
+                        showToast('已复制到剪贴板: ' + term);
+                    }
+                });
+            });
+        }
+
+        function renderSceneSelect() {
+            const scenes = ["客户", "持仓", "交易", "产品"];
+            const container = document.getElementById('sceneMultiSelect');
+            if (!container) return;
+            container.innerHTML = scenes.map(s => 
+                `<div class="scene-tag ${selectedScenes.includes(s)?'selected':''}" data-scene="${s}">${s}</div>`
+            ).join('');
+            document.querySelectorAll('.scene-tag').forEach(tag => {
+                tag.addEventListener('click', () => {
+                    const scene = tag.getAttribute('data-scene');
+                    if (selectedScenes.includes(scene)) {
+                        selectedScenes = selectedScenes.filter(s => s !== scene);
+                    } else {
+                        selectedScenes.push(scene);
+                    }
+                    renderSceneSelect();
+                    renderPrompts();
+                });
+            });
+        }
+
+        // ======== CRUD 操作 ========
+        function addPrompt() {
+            openPromptModal(null, (newData) => {
+                const newId = Date.now();
+                promptsData.push({ id: newId, ...newData });
+                renderPrompts();
+                renderSceneSelect();
+                showToast("提示词已添加");
+            });
+        }
+
+        function editPromptItem(prompt) {
+            openPromptModal(prompt, (updated) => {
+                const idx = promptsData.findIndex(p => p.id === prompt.id);
+                if (idx !== -1) {
+                    promptsData[idx].term = updated.term;
+                    promptsData[idx].type = updated.type;
+                    promptsData[idx].synonyms = updated.synonyms;
+                    promptsData[idx].mapping = updated.mapping;
+                    promptsData[idx].detail = updated.detail;
+                    promptsData[idx].scenes = updated.scenes;
+                    renderPrompts();
+                    renderSceneSelect();
+                    showToast("提示词已更新");
+                }
+            });
+        }
+
+        function deletePromptItem(id) {
+            if (confirm("确认永久删除该提示词吗？")) {
+                promptsData = promptsData.filter(p => p.id !== id);
+                renderPrompts();
+                renderSceneSelect();
+                showToast("提示词已删除");
+            }
+        }
+
+        // ======== 模态框操作 ========
+        function openPromptModal(prompt, callback) {
+            const modal = document.getElementById('promptModal');
+            const title = document.getElementById('modalTitle');
+            const editId = document.getElementById('editId');
+            const scene = document.getElementById('modalScene');
+            const type = document.getElementById('modalType');
+            const term = document.getElementById('modalTerm');
+            const synonyms = document.getElementById('modalSynonyms');
+            const mapping = document.getElementById('modalMapping');
+            const detail = document.getElementById('modalDetail');
+
+            if (prompt) {
+                title.textContent = "编辑提示词";
+                editId.value = prompt.id;
+                scene.value = prompt.scenes[0] || "客户";
+                type.value = prompt.type;
+                term.value = prompt.term;
+                synonyms.value = prompt.synonyms.join(',');
+                mapping.value = prompt.mapping || '';
+                detail.value = prompt.detail || '';
+            } else {
+                title.textContent = "新增提示词";
+                editId.value = '';
+                scene.value = "客户";
+                type.value = "实体";
+                term.value = '';
+                synonyms.value = '';
+                mapping.value = '';
+                detail.value = '';
+            }
+
+            modal.classList.add('show');
+
+            const close = () => {
+                modal.classList.remove('show');
+            };
+
+            document.getElementById('modalClose').addEventListener('click', close);
+            document.getElementById('btnCancel').addEventListener('click', close);
+
+            document.getElementById('btnConfirm').addEventListener('click', function handleConfirm() {
+                if (!term.value.trim()) {
+                    showToast('请输入标准词');
+                    return;
+                }
+
+                const data = {
+                    term: term.value.trim(),
+                    type: type.value,
+                    synonyms: synonyms.value.split(/[,，]/).map(s => s.trim()).filter(s => s),
+                    mapping: mapping.value.trim(),
+                    detail: detail.value.trim(),
+                    scenes: [scene.value]
+                };
+
+                callback(data);
+                close();
+                document.getElementById('btnConfirm').removeEventListener('click', handleConfirm);
+            });
+        }
+
+        // ======== 工具函数 ========
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            toast.textContent = msg;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2000);
+        }
+
+        // ======== 头像菜单 ========
+        document.querySelector('.avatar-wrapper').addEventListener('click', (e) => {
+            e.stopPropagation();
+            document.getElementById('avatarMenu').classList.toggle('show');
+        });
+        document.addEventListener('click', () => {
+            document.getElementById('avatarMenu').classList.remove('show');
+        });
+
+        // ======== 初始化 ========
+        document.getElementById('promptSearch')?.addEventListener('input', (e) => {
+            searchKeyword = e.target.value;
+            renderPrompts();
+        });
+        document.getElementById('addPromptBtn')?.addEventListener('click', addPrompt);
+        renderSceneSelect();
+        renderPrompts();
+    </script>
+</body>
+</html>

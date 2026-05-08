@@ -109,6 +109,7 @@
             transform: scale(1.02);
             background-color: #1f4870;
         }
+
         /* 头像下拉菜单 */
         .avatar-menu {
             position: absolute;
@@ -833,11 +834,10 @@
             </div>
         </div>
         <div class="prompt-lab">
-            <div class="lab-header"><h3><i class="fas fa-database"></i> 提示词库</h3></div>
+            <div class="lab-header"><h3><i class="fas fa-lightbulb"></i> 提示词辅助</h3></div>
             <div class="search-box"><i class="fas fa-search"></i><input type="text" id="promptSearch" placeholder="搜索术语/同义词"></div>
             <div class="scene-multi-select" id="sceneMultiSelect"></div>
             <div id="promptListContainer" style="flex:1; overflow-y: auto; padding: 0 16px 16px;"></div>
-            <div class="add-prompt-btn" id="addPromptBtn">+ 新增提示词</div>
         </div>
     </div>
     <div style="text-align: center; padding: 12px; background: #f0f5fc; border-top: 1px solid #e2eaf5; font-size: 12px; color: #6b89a8;">
@@ -1070,29 +1070,19 @@
     function renderPrompts() {
         let filtered = promptsData.filter(p => p.scenes.some(s => selectedScenes.includes(s)));
         if(searchKeyword.trim()){ let kw=searchKeyword.toLowerCase(); filtered = filtered.filter(p => p.term.toLowerCase().includes(kw) || p.synonyms.some(s=>s.toLowerCase().includes(kw))); }
-        const entities = filtered.filter(p=>p.type==="实体"), indicators = filtered.filter(p=>p.type==="指标"), params = filtered.filter(p=>p.type==="参数");
+        const indicators = filtered.filter(p=>p.type==="指标");
         const container = document.getElementById('promptListContainer');
         if(!container) return;
-        if(entities.length===0 && indicators.length===0 && params.length===0){ container.innerHTML='<div class="empty-tip">暂无匹配提示词，点击“+新增”添加</div>'; return; }
+        if(indicators.length===0){ container.innerHTML='<div class="empty-tip">暂无匹配提示词</div>'; return; }
         const renderCards = (list) => list.map(p => `
             <div class="prompt-card" data-id="${p.id}">
                 <div class="prompt-term" data-term="${escapeHtml(p.term)}" title="点击插入到输入框">📌 ${escapeHtml(p.term)}</div>
-                <div class="card-actions">
-                    <i class="fas fa-edit edit-prompt-icon" data-id="${p.id}" title="编辑"></i>
-                    <i class="fas fa-trash-alt delete-prompt-icon" data-id="${p.id}" title="删除"></i>
-                </div>
                 <div class="prompt-detail"><span>🏷️ ${p.synonyms.join(', ') || '无'}</span></div>
-                <div class="prompt-detail"><span>📊 ${p.mapping}</span></div>
-                <div class="prompt-detail"><span>📋 ${p.detail}</span></div>
             </div>
         `).join('');
-        let html = `<div class="type-section"><div class="type-header ${collapsedState.实体?'collapsed':''}" data-type="实体"><span><i class="fas fa-user"></i> 实体 · ${entities.length}</span><i class="fas fa-chevron-down"></i></div><div class="type-content">${renderCards(entities)}</div></div>`;
-        html += `<div class="type-section"><div class="type-header ${collapsedState.指标?'collapsed':''}" data-type="指标"><span><i class="fas fa-chart-line"></i> 指标 · ${indicators.length}</span><i class="fas fa-chevron-down"></i></div><div class="type-content">${renderCards(indicators)}</div></div>`;
-        html += `<div class="type-section"><div class="type-header ${collapsedState.参数?'collapsed':''}" data-type="参数"><span><i class="fas fa-sliders-h"></i> 参数 · ${params.length}</span><i class="fas fa-chevron-down"></i></div><div class="type-content">${renderCards(params)}</div></div>`;
+        let html = `<div class="type-section"><div class="type-header"><span><i class="fas fa-chart-line"></i> 指标 · ${indicators.length}</span></div><div class="type-content">${renderCards(indicators)}</div></div>`;
         container.innerHTML = html;
         document.querySelectorAll('.type-header').forEach(h=>h.addEventListener('click',(e)=>{ let t=h.getAttribute('data-type'); if(t){ collapsedState[t]=!collapsedState[t]; renderPrompts(); } }));
-        document.querySelectorAll('.edit-prompt-icon').forEach(btn => btn.addEventListener('click',(e)=>{ let id=parseInt(btn.getAttribute('data-id')); let prompt = promptsData.find(p=>p.id===id); if(prompt) editPromptItem(prompt); }));
-        document.querySelectorAll('.delete-prompt-icon').forEach(btn => btn.addEventListener('click',(e)=>{ let id=parseInt(btn.getAttribute('data-id')); deletePromptItem(id); }));
         document.querySelectorAll('.prompt-term').forEach(termEl => termEl.addEventListener('click',(e)=>{ let term=termEl.getAttribute('data-term'); if(term) insertPromptToInput(term); }));
     }
 
@@ -1101,7 +1091,7 @@
         const container = document.getElementById('sceneMultiSelect');
         if(!container) return;
         container.innerHTML = scenes.map(s => `<div class="scene-tag ${selectedScenes.includes(s)?'selected':''}" data-scene="${s}">${s}</div>`).join('');
-        document.querySelectorAll('.scene-tag').forEach(tag=>{ tag.addEventListener('click',()=>{ const scene=tag.getAttribute('data-scene'); if(selectedScenes.includes(scene)) selectedScenes=selectedScenes.filter(s=>s!==scene); else selectedScenes.push(scene); renderSceneSelect(); renderPrompts(); }); });
+        document.querySelectorAll('.scene-tag').forEach(tag=>{ tag.addEventListener('click',()=>{ const scene=tag.getAttribute('data-scene'); if(selectedScenes.includes(scene)){ if(selectedScenes.length>1) selectedScenes=[scene]; else selectedScenes=[]; } else selectedScenes=[scene]; renderSceneSelect(); renderPrompts(); }); });
     }
     document.getElementById('promptSearch')?.addEventListener('input',(e)=>{ searchKeyword=e.target.value; renderPrompts(); });
     document.getElementById('addPromptBtn')?.addEventListener('click', addPrompt);
