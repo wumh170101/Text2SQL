@@ -491,22 +491,6 @@
             cursor: pointer;
         }
 
-        .quick-row {
-            margin-top: 12px;
-            display: flex;
-            gap: 16px;
-            font-size: 13px;
-            color: #3865a5;
-            cursor: pointer;
-            flex-wrap: wrap;
-        }
-
-        .quick-row span {
-            background: #f0f6fe;
-            padding: 6px 16px;
-            border-radius: 40px;
-        }
-
         .toast-msg {
             position: fixed;
             bottom: 30px;
@@ -622,12 +606,6 @@
                     <input type="text" id="questionInput" placeholder="例如：查询本周过生日的客户 / 客户持仓总金额排名...">
                     <button class="mic-btn" id="micBtn"><i class="fas fa-microphone"></i></button>
                     <button id="sendBtn"><i class="fas fa-arrow-up"></i></button>
-                </div>
-                <div class="quick-row">
-                    <span id="quick1"><i class="fas fa-birthday-cake"></i> 本周生日</span>
-                    <span id="quick2"><i class="fas fa-chart-line"></i> 持仓超1000万</span>
-                    <span id="quick3"><i class="fas fa-chart-pie"></i> 风险分布</span>
-                    <span id="quick4"><i class="fas fa-ranking-star"></i> 持仓排名</span>
                 </div>
             </div>
             <div class="footer-tip">
@@ -909,10 +887,6 @@
     // 事件绑定
     document.getElementById('sendBtn').addEventListener('click',()=>{ let q=document.getElementById('questionInput').value.trim(); if(q){ loadConversation(q); document.getElementById('questionInput').value=''; } });
     document.getElementById('questionInput').addEventListener('keypress',e=>{ if(e.key==='Enter') document.getElementById('sendBtn').click(); });
-    document.getElementById('quick1').onclick=()=>loadConversation('查询本周过生日的客户');
-    document.getElementById('quick2').onclick=()=>loadConversation('持仓规模超过1000万的客户');
-    document.getElementById('quick3').onclick=()=>loadConversation('风险等级分布');
-    document.getElementById('quick4').onclick=()=>loadConversation('客户持仓总金额排名');
 
     // 初始化渲染
     renderHistory();
