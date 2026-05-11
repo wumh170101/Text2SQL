@@ -713,18 +713,18 @@
     function generateFullAnswer(q){
         const lower = q.toLowerCase();
         if(lower.includes('本周过生日') || lower.includes('本周生日')) {
-            return { type:'table', title:'🎂 本周过生日的客户列表', columns:['客户名称','生日日期','客户类型'], rows:[['陈敏','2026-04-24','自然人'],['刘振国','2026-04-25','机构'],['王雅君','2026-04-27','自然人'],['赵司','2026-04-28','高净值']], summary:'共4位客户本周过生日', thinking:{ userQuestion:'本周有哪些客户过生日？', systemUnderstanding:{time:'本周', dimension:'客户名称', metric:'生日日期', filter:'无'}, confidence:'95%（高）', confidenceReason:'时间、维度明确，无歧义', dataSource:'客户表', fieldMapping:{cust_name:'客户名称', birthday:'生日日期（筛选）'}, dataUpdateTime:'2026-05-09 08:00', executionSummary:'查询执行成功，耗时125ms，返回4行数据', chartRecommendation:'表格', chartReason:'您查询的是本周生日的客户列表，需要展示每位客户的详细信息，表格能清晰呈现列表数据' }, suggestions:['能导出这份生日名单吗','这些客户有购买过哪些产品','请生成客户关怀建议'] };
+            return { type:'table', title:'🎂 本周过生日的客户列表', columns:['客户名称','生日日期','客户类型'], rows:[['陈敏','2026-04-24','自然人'],['刘振国','2026-04-25','机构'],['王雅君','2026-04-27','自然人'],['赵司','2026-04-28','高净值']], summary:'共4位客户本周过生日', thinking:{ userQuestion:'本周有哪些客户过生日？', systemUnderstanding:'查询本周过生日的客户', answerExplanation:'共查询到4位客户的数据。其中自然人客户2位，机构客户1位，高净值客户1位。赵司作为高净值客户，建议重点关怀。' }, suggestions:['能导出这份生日名单吗','这些客户有购买过哪些产品','请生成客户关怀建议'] };
         }
         if(lower.includes('持仓规模超过1000万') || lower.includes('持仓超过1000万')) {
-            return { type:'table', title:'💰 持仓规模超过1000万的客户', columns:['客户名称','持仓总规模(万元)','产品数量'], rows:[['赵司','1260','4'],['林德福','1520','5'],['周裕华','1100','3']], summary:'共3位客户持仓超千万', thinking:{ userQuestion:'哪些客户持仓规模超过1000万？', systemUnderstanding:{time:'无', dimension:'客户名称', metric:'持仓金额（求和）', filter:'持仓>1000万'}, confidence:'92%（高）', confidenceReason:'查询条件明确，过滤阈值清晰', dataSource:'持仓表', fieldMapping:{cust_name:'客户名称', amount:'持仓金额（求和）'}, dataUpdateTime:'2026-05-09 08:00', executionSummary:'查询执行成功，耗时180ms，返回3行数据', chartRecommendation:'表格', chartReason:'您查询的是高净值客户列表，需要展示每位客户的具体持仓金额，表格能准确呈现数值对比' }, suggestions:['这些客户的详细持仓明细是什么','能为他们推荐新产品吗','请分析客户资产配置偏好'] };
+            return { type:'table', title:'💰 持仓规模超过1000万的客户', columns:['客户名称','持仓总规模(万元)','产品数量'], rows:[['赵司','1260','4'],['林德福','1520','5'],['周裕华','1100','3']], summary:'共3位客户持仓超千万', thinking:{ userQuestion:'哪些客户持仓规模超过1000万？', systemUnderstanding:'查询持仓规模超过1000万的客户', answerExplanation:'共查询到3位客户的数据，总持仓金额为3880万元。林德福以1520万位居榜首，持有5个产品，是重点关注对象。' }, suggestions:['这些客户的详细持仓明细是什么','能为他们推荐新产品吗','请分析客户资产配置偏好'] };
         }
         if(lower.includes('风险等级分布') || lower.includes('风险分布')) {
-            return { type:'pie', title:'📊 客户风险等级分布', data:{'C1保守型':8,'C2稳健型':24,'C3平衡型':35,'C4进取型':28,'C5激进型':15}, summary:'C3及以上客户占比78%', thinking:{ userQuestion:'客户风险等级是如何分布的？', systemUnderstanding:{time:'无', dimension:'风险等级', metric:'客户数量（计数）', filter:'无'}, confidence:'98%（高）', confidenceReason:'统计维度明确，无歧义', dataSource:'客户表', fieldMapping:{risk_level:'风险等级（分组）', count:'客户数量（计数）'}, dataUpdateTime:'2026-05-09 08:00', executionSummary:'查询执行成功，耗时95ms，返回5行数据', chartRecommendation:'饼图', chartReason:'您查询的是各风险等级的占比分布，饼图能直观呈现不同等级的占比关系' }, suggestions:['各风险等级适合推荐什么产品','想看高风险客户的详细名单','请分析风险等级变化趋势'] };
+            return { type:'pie', title:'📊 客户风险等级分布', data:{'C1保守型':8,'C2稳健型':24,'C3平衡型':35,'C4进取型':28,'C5激进型':15}, summary:'C3及以上客户占比78%', thinking:{ userQuestion:'客户风险等级是如何分布的？', systemUnderstanding:'查询客户风险等级分布', answerExplanation:'共查询到110位客户的数据。C3平衡型客户最多（35人），C3及以上客户占比达78%，说明客户整体风险承受能力较强。' }, suggestions:['各风险等级适合推荐什么产品','想看高风险客户的详细名单','请分析风险等级变化趋势'] };
         }
         if(lower.includes('客户持仓总金额排名') || lower.includes('持仓金额排名')) {
-            return { type:'bar', title:'🏆 客户持仓总金额排名 (万元)', labels:['赵司','林德福','周裕华','陈国富','孙立人'], values:[1260,1520,1100,980,870], summary:'林德福客户持仓总金额最高', thinking:{ userQuestion:'客户持仓金额排名是怎样的？', systemUnderstanding:{time:'无', dimension:'客户名称', metric:'持仓金额（求和）', filter:'Top5'}, confidence:'96%（高）', confidenceReason:'排名查询意图明确，排序条件清晰', dataSource:'持仓表', fieldMapping:{cust_name:'客户名称（分组）', amount:'持仓金额（求和）'}, dataUpdateTime:'2026-05-09 08:00', executionSummary:'查询执行成功，耗时210ms，返回5行数据', chartRecommendation:'柱状图', chartReason:'您查询的是各客户持仓金额排名，柱状图能清晰对比不同客户的金额大小' }, suggestions:['请分析前两名客户的差距原因','能查看更多排名吗','流失预警可以说明一下吗'] };
+            return { type:'bar', title:'🏆 客户持仓总金额排名 (万元)', labels:['赵司','林德福','周裕华','陈国富','孙立人'], values:[1260,1520,1100,980,870], summary:'林德福客户持仓总金额最高', thinking:{ userQuestion:'客户持仓金额排名是怎样的？', systemUnderstanding:'查询客户持仓金额排名', answerExplanation:'展示前5位客户的持仓金额，总金额为5730万元。林德福以1520万位居榜首，赵司以1260万紧随其后，差距较小。' }, suggestions:['请分析前两名客户的差距原因','能查看更多排名吗','流失预警可以说明一下吗'] };
         }
-        return { type:'text', title:'📌 查询结果', content:`✅ 赵司总持仓 ¥1,260 万，其中固收类 880 万 (69.8%)，权益类 380 万 (30.2%)。`, summary:'数据截止今日', thinking:{ userQuestion:'赵司的持仓金额和类型分布是多少？', systemUnderstanding:{time:'无', dimension:'资产类型', metric:'持仓金额（求和）', filter:'客户=赵司'}, confidence:'94%（高）', confidenceReason:'客户明确，查询维度清晰', dataSource:'持仓表', fieldMapping:{asset_type:'资产类型（分组）', amount:'持仓金额（求和）'}, dataUpdateTime:'2026-05-09 08:00', executionSummary:'查询执行成功，耗时150ms，返回2行数据', chartRecommendation:'饼图', chartReason:'您查询的是赵司的资产类型分布，饼图能直观展示固收类和权益类的占比关系' }, suggestions:['能帮我分析一下配置是否合理吗','想优化这个客户的资产配置','请预测持仓变化趋势'] };
+        return { type:'text', title:'📌 查询结果', content:`✅ 赵司总持仓 ¥1,260 万，其中固收类 880 万 (69.8%)，权益类 380 万 (30.2%)。`, summary:'数据截止今日', thinking:{ userQuestion:'赵司的持仓金额和类型分布是多少？', systemUnderstanding:'查询赵司的持仓金额和类型分布', answerExplanation:'赵司总持仓1260万元。其中固收类占69.8%（880万），权益类占30.2%（380万），投资风格偏保守。' }, suggestions:['能帮我分析一下配置是否合理吗','想优化这个客户的资产配置','请预测持仓变化趋势'] };
     }
 
     function renderAnswerCard(ans, container, questionText){
@@ -737,32 +737,12 @@
         stepsDiv.appendChild(titleRow);
         const stepsContent = document.createElement('div'); stepsContent.className='steps-content';
         stepsContent.style.display = 'none';
-        stepsContent.innerHTML = `<div class="step"><div class="step-header" onclick="this.parentElement.classList.toggle('collapsed')"><i class="fas fa-chevron-right"></i> 意图识别</div><div class="step-content">
+        stepsContent.innerHTML = `<div class="step"><div class="step-header" onclick="this.parentElement.classList.toggle('collapsed')"><i class="fas fa-chevron-right"></i> 理解您的问题</div><div class="step-content">
             <div style="margin-bottom:10px"><strong>您问：</strong>${ans.thinking.userQuestion}</div>
-            <div style="margin-bottom:8px"><strong>系统理解：</strong></div>
-            <div style="padding-left:20px; margin-bottom:8px">
-                <div>• 时间：${ans.thinking.systemUnderstanding.time}</div>
-                <div>• 查询维度：${ans.thinking.systemUnderstanding.dimension}</div>
-                <div>• 查询指标：${ans.thinking.systemUnderstanding.metric}</div>
-                <div>• 过滤条件：${ans.thinking.systemUnderstanding.filter}</div>
-            </div>
-            <div style="margin-bottom:8px"><strong>置信度：</strong>${ans.thinking.confidence}</div>
-            <div>• 原因：${ans.thinking.confidenceReason}</div>
+            <div><strong>系统理解：</strong>${ans.thinking.systemUnderstanding}</div>
         </div></div>
-        <div class="step"><div class="step-header" onclick="this.parentElement.classList.toggle('collapsed')"><i class="fas fa-chevron-right"></i> 语义映射</div><div class="step-content">
-            <div style="margin-bottom:8px"><strong>匹配数据源：</strong>${ans.thinking.dataSource}</div>
-            <div style="margin-bottom:8px"><strong>字段映射：</strong></div>
-            <div style="padding-left:20px">
-                ${Object.entries(ans.thinking.fieldMapping).map(([k, v]) => `<div>• ${k} → ${v}</div>`).join('')}
-            </div>
-            <div style="margin-top:8px"><strong>数据更新时间：</strong>${ans.thinking.dataUpdateTime}</div>
-        </div></div>
-        <div class="step"><div class="step-header" onclick="this.parentElement.classList.toggle('collapsed')"><i class="fas fa-chevron-right"></i> 规划执行</div><div class="step-content">
-            <div>${ans.thinking.executionSummary}</div>
-        </div></div>
-        <div class="step"><div class="step-header" onclick="this.parentElement.classList.toggle('collapsed')"><i class="fas fa-chevron-right"></i> 可视化推荐</div><div class="step-content">
-            <div style="margin-bottom:8px"><strong>推荐图表：</strong>${ans.thinking.chartRecommendation}</div>
-            <div><strong>推荐理由：</strong>${ans.thinking.chartReason}</div>
+        <div class="step"><div class="step-header" onclick="this.parentElement.classList.toggle('collapsed')"><i class="fas fa-chevron-right"></i> 答案说明</div><div class="step-content">
+            <div>${ans.thinking.answerExplanation}</div>
         </div></div>`;
         stepsDiv.appendChild(stepsContent);
         container.appendChild(stepsDiv);
