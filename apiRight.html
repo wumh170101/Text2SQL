@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>API注册中心 - 消费方管理 | 字段级权限配置</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            background: #eef2f6;
+            color: #1a2c3e;
+            padding: 32px;
+        }
+        .main-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: #fff;
+            border-radius: 28px;
+            box-shadow: 0 12px 28px rgba(0,0,0,0.08);
+            overflow: hidden;
+        }
+        .header {
+            padding: 24px 32px 16px 32px;
+            border-bottom: 1px solid #eef2f8;
+        }
+        .header h1 {
+            font-size: 26px;
+            font-weight: 600;
+            color: #0f2f3f;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .badge {
+            background: #eaf2f9;
+            padding: 4px 12px;
+            border-radius: 40px;
+            font-size: 13px;
+            font-weight: normal;
+        }
+        .sub {
+            color: #5e7e97;
+            font-size: 14px;
+            margin-top: 6px;
+        }
+        /* 布局 */
+        .split-layout {
+            display: flex;
+            height: calc(100vh - 190px);
+            min-height: 600px;
+        }
+        /* 左侧消费方列表 */
+        .consumer-sidebar {
+            width: 300px;
+            border-right: 1px solid #e9edf2;
+            background: #fbfefe;
+            display: flex;
+            flex-direction: column;
+        }
+        .sidebar-header {
+            padding: 20px 20px 12px;
+            font-weight: 600;
+            border-bottom: 1px solid #eef2f8;
+        }
+        .consumer-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 12px;
+        }
+        .consumer-item {
+            padding: 14px 16px;
+            margin-bottom: 8px;
+            background: white;
+            border-radius: 20px;
+            border: 1px solid #e2eaf1;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .consumer-item.active {
+            border-color: #1f6e9c;
+            background: #f0f7ff;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+        }
+        .consumer-name {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        .consumer-id {
+            font-size: 11px;
+            color: #6f8fae;
+        }
+        /* 右侧授权区域 */
+        .auth-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: white;
+            overflow: hidden;
+        }
+        .auth-header {
+            padding: 16px 24px;
+            background: #fafdff;
+            border-bottom: 1px solid #edf2f8;
+        }
+        .auth-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+        .auth-desc {
+            font-size: 12px;
+            color: #6a8aaa;
+            margin-top: 4px;
+        }
+        .api-field-tree {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+        /* API 树区域 */
+        .api-tree-panel {
+            width: 40%;
+            border-right: 1px solid #eef2f8;
+            overflow-y: auto;
+            padding: 16px 12px;
+            background: #fefefe;
+        }
+        .field-tree-panel {
+            width: 60%;
+            overflow-y: auto;
+            padding: 16px 20px;
+            background: white;
+        }
+        .section-title {
+            font-weight: 600;
+            margin-bottom: 16px;
+            font-size: 14px;
+            color: #2c5a7a;
+        }
+        .tree-node {
+            margin: 6px 0;
+        }
+        .node-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 8px;
+            border-radius: 12px;
+            cursor: pointer;
+        }
+        .node-row:hover {
+            background: #eef3fc;
+        }
+        .node-check {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            accent-color: #1f6e9c;
+        }
+        .node-label {
+            font-size: 13px;
+            font-weight: 500;
+        }
+        .api-badge {
+            background: #eef2fa;
+            font-size: 10px;
+            padding: 2px 8px;
+            border-radius: 30px;
+            margin-left: 8px;
+        }
+        .field-item {
+            margin: 8px 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 8px;
+            border-radius: 12px;
+        }
+        .field-item:hover {
+            background: #f5f9fe;
+        }
+        .save-area {
+            padding: 16px 24px;
+            border-top: 1px solid #eef2f8;
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            background: #fff;
+        }
+        .btn-primary {
+            background: #1f6e9c;
+            border: none;
+            padding: 8px 28px;
+            border-radius: 32px;
+            color: white;
+            font-weight: 500;
+            cursor: pointer;
+        }
+        .btn-outline {
+            background: white;
+            border: 1px solid #cbdde9;
+            padding: 8px 24px;
+            border-radius: 32px;
+            cursor: pointer;
+        }
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: #1f2f3c;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 40px;
+            font-size: 13px;
+            opacity: 0;
+            transition: 0.2s;
+            z-index: 1100;
+        }
+        .empty-tip {
+            color: #9bb1c5;
+            text-align: center;
+            padding: 40px;
+            font-size: 13px;
+        }
+        hr {
+            margin: 8px 0;
+        }
+    </style>
+</head>
+<body>
+<div class="main-container">
+    <div class="header">
+        <h1>🔐 API注册中心 <span class="badge">消费方管理 · 字段级权限</span></h1>
+        <div class="sub">维护消费方（智能体+角色）与 API / 字段的映射关系，动态控制不同角色的数据访问粒度。</div>
+    </div>
+    <div class="split-layout">
+        <!-- 左侧消费方列表 -->
+        <div class="consumer-sidebar">
+            <div class="sidebar-header">📋 消费方列表</div>
+            <div class="consumer-list" id="consumerList"></div>
+        </div>
+
+        <!-- 右侧授权区域 -->
+        <div class="auth-panel" id="authPanel">
+            <div class="auth-header">
+                <div class="auth-title" id="currentConsumerName">智能问数_理财经理</div>
+                <div class="auth-desc">配置该消费方可访问的 API 及字段（字段级白名单）</div>
+            </div>
+            <div class="api-field-tree">
+                <!-- 左侧 API 树 -->
+                <div class="api-tree-panel">
+                    <div class="section-title">🌐 API 资源树</div>
+                    <div id="apiTreeContainer"></div>
+                </div>
+                <!-- 右侧字段树 (展示选中API的字段) -->
+                <div class="field-tree-panel">
+                    <div class="section-title">🔖 字段权限 <span id="selectedApiName" style="font-weight: normal;">(请选择左侧API)</span></div>
+                    <div id="fieldTreeContainer"></div>
+                </div>
+            </div>
+            <div class="save-area">
+                <button class="btn-outline" id="resetBtn">重置</button>
+                <button class="btn-primary" id="saveAuthBtn">保存授权配置</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="toastMsg" class="toast"></div>
+
+<script>
+    // ---------- 1. MOCK 数据：API 完整结构 ----------
+    const apiCatalog = [
+        {
+            id: "api_customer",
+            name: "客户服务",
+            apis: [
+                { id: "/api/customer/list", name: "客户列表查询", fields: ["customer_name", "customer_phone", "hold_amount", "id_card", "customer_level"] },
+                { id: "/api/customer/detail", name: "客户详情", fields: ["customer_name", "customer_phone", "email", "hold_amount", "risk_profile"] }
+            ]
+        },
+        {
+            id: "api_product",
+            name: "产品服务",
+            apis: [
+                { id: "/api/product/list", name: "产品清单", fields: ["product_code", "product_name", "risk_level", "return_rate", "scale"] },
+                { id: "/api/product/performance", name: "产品业绩", fields: ["product_name", "return_rate", "volatility", "sharpe"] }
+            ]
+        },
+        {
+            id: "api_project",
+            name: "项目服务",
+            apis: [
+                { id: "/api/project/list", name: "项目列表", fields: ["project_name", "project_scale", "project_status", "manager_name"] },
+                { id: "/api/project/finance", name: "项目资金流水", fields: ["project_name", "amount", "trans_date", "counterparty"] }
+            ]
+        }
+    ];
+
+    // 消费方列表 Mock
+    let consumers = [
+        { id: "licaijingli_consumer", name: "智能问数_理财经理", roleId: "licaijingli" },
+        { id: "xinji_consumer", name: "智能问数_信托经理", roleId: "xinji" }
+    ];
+
+    // 存储每个消费方的授权配置: { apiPath: { allowedFields: [] } }
+    let authStore = {
+        "licaijingli_consumer": {
+            "/api/customer/list": { allowedFields: ["customer_name", "hold_amount", "customer_level"] },
+            "/api/product/list": { allowedFields: ["product_name", "risk_level", "return_rate"] },
+            "/api/project/list": { allowedFields: ["project_name", "project_scale"] }
+        },
+        "xinji_consumer": {
+            "/api/project/list": { allowedFields: ["project_name", "project_scale", "project_status"] },
+            "/api/customer/list": { allowedFields: ["customer_name"] }
+        }
+    };
+
+    let currentConsumerId = "licaijingli_consumer";    // 选中的消费方
+    let currentSelectedApi = null;                     // 当前选中的API对象 { id, name, fields }
+
+    // UI辅助
+    function showToast(msg, isError = false) {
+        const toast = document.getElementById('toastMsg');
+        toast.textContent = msg;
+        toast.style.opacity = '1';
+        toast.style.background = isError ? '#c23d2e' : '#1f2f3c';
+        setTimeout(() => { toast.style.opacity = '0'; }, 2000);
+    }
+
+    // 渲染左侧消费方列表
+    function renderConsumerList() {
+        const container = document.getElementById('consumerList');
+        container.innerHTML = '';
+        consumers.forEach(consumer => {
+            const div = document.createElement('div');
+            div.className = `consumer-item ${currentConsumerId === consumer.id ? 'active' : ''}`;
+            div.setAttribute('data-id', consumer.id);
+            div.innerHTML = `
+                <div class="consumer-name">${escapeHtml(consumer.name)}</div>
+                <div class="consumer-id">消费方标识: ${consumer.id}</div>
+            `;
+            div.addEventListener('click', () => {
+                if (currentConsumerId === consumer.id) return;
+                currentConsumerId = consumer.id;
+                currentSelectedApi = null;
+                renderConsumerList();
+                renderApiTree();
+                renderFieldTree();
+                updateAuthHeader();
+            });
+            container.appendChild(div);
+        });
+    }
+
+    // 更新右侧头部
+    function updateAuthHeader() {
+        const consumer = consumers.find(c => c.id === currentConsumerId);
+        if (consumer) {
+            document.getElementById('currentConsumerName').innerText = consumer.name;
+        }
+    }
+
+    // 获取当前消费方的授权配置
+    function getCurrentAuthConfig() {
+        if (!authStore[currentConsumerId]) {
+            authStore[currentConsumerId] = {};
+        }
+        return authStore[currentConsumerId];
+    }
+
+    // 渲染API树（左侧）
+    function renderApiTree() {
+        const container = document.getElementById('apiTreeContainer');
+        if (!container) return;
+        container.innerHTML = '';
+        const currentAuth = getCurrentAuthConfig();
+        apiCatalog.forEach(service => {
+            const serviceDiv = document.createElement('div');
+            serviceDiv.style.marginBottom = '12px';
+            const serviceTitle = document.createElement('div');
+            serviceTitle.style.fontWeight = '600';
+            serviceTitle.style.fontSize = '13px';
+            serviceTitle.style.margin = '8px 0 4px 0';
+            serviceTitle.innerText = service.name;
+            serviceDiv.appendChild(serviceTitle);
+            service.apis.forEach(api => {
+                const isChecked = !!currentAuth[api.id];
+                const node = document.createElement('div');
+                node.className = 'tree-node';
+                node.innerHTML = `
+                    <div class="node-row" data-api-id="${api.id}" data-api-name="${api.name}" data-api-fields='${JSON.stringify(api.fields)}'>
+                        <input type="checkbox" class="node-check api-check" data-api="${api.id}" ${isChecked ? 'checked' : ''}>
+                        <span class="node-label">${escapeHtml(api.name)} <span class="api-badge">API</span></span>
+                    </div>
+                `;
+                const rowDiv = node.querySelector('.node-row');
+                const checkbox = node.querySelector('.api-check');
+                checkbox.addEventListener('change', (e) => {
+                    e.stopPropagation();
+                    if (checkbox.checked) {
+                        // 授权此API: 默认允许全部字段
+                        if (!currentAuth[api.id]) currentAuth[api.id] = { allowedFields: [...api.fields] };
+                        else currentAuth[api.id].allowedFields = [...api.fields];
+                        showToast(`已授权 ${api.name}，默认开放全部字段，可在右侧精细调整字段`, false);
+                    } else {
+                        delete currentAuth[api.id];
+                        if (currentSelectedApi && currentSelectedApi.id === api.id) {
+                            currentSelectedApi = null;
+                            renderFieldTree();
+                        }
+                        showToast(`已移除 ${api.name} 授权`);
+                    }
+                    renderApiTree();  // 刷新勾选状态
+                    renderFieldTree(); // 如果当前选中的API被取消，右侧清空
+                });
+                rowDiv.addEventListener('click', (e) => {
+                    if (e.target.type !== 'checkbox') {
+                        // 选中API展示右侧字段树
+                        currentSelectedApi = { id: api.id, name: api.name, fields: api.fields };
+                        renderFieldTree();
+                    }
+                });
+                serviceDiv.appendChild(node);
+            });
+            container.appendChild(serviceDiv);
+        });
+    }
+
+    // 渲染右侧字段树（基于当前选中的API & 消费方授权配置）
+    function renderFieldTree() {
+        const container = document.getElementById('fieldTreeContainer');
+        const selectedApiNameSpan = document.getElementById('selectedApiName');
+        if (!currentSelectedApi) {
+            selectedApiNameSpan.innerText = '(请选择左侧API)';
+            container.innerHTML = `<div class="empty-tip">👈 请从左侧选择API，配置其字段白名单</div>`;
+            return;
+        }
+        selectedApiNameSpan.innerText = `当前API：${currentSelectedApi.name}`;
+        const currentAuth = getCurrentAuthConfig();
+        const apiAuth = currentAuth[currentSelectedApi.id];
+        const allowedSet = apiAuth ? new Set(apiAuth.allowedFields) : new Set();
+        const allFields = currentSelectedApi.fields;
+
+        container.innerHTML = '';
+        allFields.forEach(field => {
+            const isChecked = allowedSet.has(field);
+            const fieldDiv = document.createElement('div');
+            fieldDiv.className = 'field-item';
+            fieldDiv.innerHTML = `
+                <input type="checkbox" class="field-check" data-field="${field}" ${isChecked ? 'checked' : ''}>
+                <span class="node-label">${escapeHtml(field)}</span>
+                ${field === 'id_card' || field === 'customer_phone' ? '<span style="font-size:10px; background:#fee9e6; padding:2px 6px; border-radius:12px;">敏感字段</span>' : ''}
+            `;
+            const cb = fieldDiv.querySelector('.field-check');
+            cb.addEventListener('change', (e) => {
+                e.stopPropagation();
+                if (!currentAuth[currentSelectedApi.id]) {
+                    currentAuth[currentSelectedApi.id] = { allowedFields: [] };
+                }
+                if (cb.checked) {
+                    if (!currentAuth[currentSelectedApi.id].allowedFields.includes(field)) {
+                        currentAuth[currentSelectedApi.id].allowedFields.push(field);
+                    }
+                } else {
+                    const idx = currentAuth[currentSelectedApi.id].allowedFields.indexOf(field);
+                    if (idx !== -1) currentAuth[currentSelectedApi.id].allowedFields.splice(idx, 1);
+                }
+                // 实时刷新右侧保持视觉一致性（重新绘制但不改变api其他状态）
+                renderFieldTree();
+                renderApiTree();   // 为了让左侧API的勾选状态维持（无变化）
+            });
+            container.appendChild(fieldDiv);
+        });
+
+        if (allFields.length === 0) {
+            container.innerHTML = `<div class="empty-tip">该 API 无可用字段</div>`;
+        }
+    }
+
+    // 重置当前消费方的授权配置
+    function resetCurrentAuth() {
+        if (!confirm(`重置当前消费方「${consumers.find(c=>c.id===currentConsumerId)?.name}」的授权配置，将清空所有API授权，确定吗？`)) return;
+        authStore[currentConsumerId] = {};
+        currentSelectedApi = null;
+        renderApiTree();
+        renderFieldTree();
+        showToast('已重置授权配置');
+    }
+
+    // 保存当前消费方授权 (模拟保存)
+    function saveCurrentAuth() {
+        const consumer = consumers.find(c => c.id === currentConsumerId);
+        const config = authStore[currentConsumerId];
+        const totalApis = Object.keys(config).length;
+        let totalFields = 0;
+        for (let apiPath in config) {
+            totalFields += config[apiPath].allowedFields.length;
+        }
+        showToast(`✅ 已保存「${consumer.name}」授权：${totalApis} 个API，共 ${totalFields} 个字段白名单`);
+        console.log(`保存配置[${consumer.name}]:`, config);
+    }
+
+    function escapeHtml(str) {
+        if(!str) return '';
+        return str.replace(/[&<>]/g, function(m){
+            if(m === '&') return '&amp;';
+            if(m === '<') return '&lt;';
+            if(m === '>') return '&gt;';
+            return m;
+        });
+    }
+
+    // 监听重置与保存按钮
+    document.getElementById('resetBtn').addEventListener('click', resetCurrentAuth);
+    document.getElementById('saveAuthBtn').addEventListener('click', saveCurrentAuth);
+
+    // 初始化页面
+    function init() {
+        renderConsumerList();
+        renderApiTree();
+        updateAuthHeader();
+        // 默认预先选中理财经理的第一个API便于展示（可选）
+        const defaultConsumerAuth = authStore[currentConsumerId];
+        const firstApiId = Object.keys(defaultConsumerAuth || {})[0];
+        if (firstApiId) {
+            for (let service of apiCatalog) {
+                const found = service.apis.find(api => api.id === firstApiId);
+                if (found) {
+                    currentSelectedApi = { id: found.id, name: found.name, fields: found.fields };
+                    break;
+                }
+            }
+        }
+        renderFieldTree();
+    }
+
+    init();
+</script>
+</body>
+</html>

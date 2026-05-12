@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>行级权限管理系统 - 信托业务</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            background: #f0f2f6;
+            padding: 32px 24px;
+            color: #1e293b;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .title-section h1 {
+            font-size: 1.8rem;
+            font-weight: 600;
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+        }
+
+        .title-section p {
+            color: #5b6e8c;
+            font-size: 0.9rem;
+            margin-top: 4px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.03), 0 2px 6px rgba(0, 0, 0, 0.05);
+            overflow-x: auto;
+            padding: 0;
+        }
+
+        .user-table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 1000px;
+        }
+
+        .user-table th {
+            text-align: left;
+            padding: 18px 16px;
+            background-color: #f9fafb;
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: #334155;
+            border-bottom: 1px solid #e4e7ec;
+        }
+
+        .user-table td {
+            padding: 14px 16px;
+            border-bottom: 1px solid #edf2f7;
+            font-size: 0.9rem;
+            vertical-align: middle;
+        }
+
+        .user-table tr:hover td {
+            background-color: #fafcff;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 30px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            background: #eef2ff;
+            color: #1e3a8a;
+        }
+
+        .type-tag {
+            background: #e0f2fe;
+            color: #0369a1;
+        }
+
+        .edit-link {
+            color: #2c5f8a;
+            cursor: pointer;
+            font-weight: 500;
+            text-decoration: none;
+            font-size: 0.85rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: none;
+            border: none;
+        }
+
+        .edit-link:hover {
+            color: #0f3b5c;
+            text-decoration: underline;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(3px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            visibility: hidden;
+            opacity: 0;
+            transition: visibility 0.2s, opacity 0.2s;
+        }
+
+        .modal-overlay.active {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .modal {
+            background: white;
+            width: 560px;
+            max-width: 90%;
+            border-radius: 28px;
+            box-shadow: 0 25px 45px -12px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            animation: fadeUp 0.2s ease;
+        }
+
+        @keyframes fadeUp {
+            from {
+                transform: translateY(20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-header {
+            padding: 20px 24px 12px 24px;
+            border-bottom: 1px solid #eef2f6;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h3 {
+            font-weight: 600;
+            font-size: 1.35rem;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #8a99b4;
+        }
+
+        .modal-body {
+            padding: 24px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 500;
+            font-size: 0.85rem;
+            margin-bottom: 6px;
+            color: #334155;
+        }
+
+        .form-group select {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid #cbd5e1;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            background: white;
+        }
+
+        .info-banner {
+            background: #f0f9ff;
+            border-radius: 14px;
+            padding: 12px 16px;
+            margin-bottom: 20px;
+            font-size: 0.8rem;
+            color: #0c4a6e;
+            border-left: 4px solid #2c5f8a;
+        }
+
+        .modal-footer {
+            padding: 16px 24px 24px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            border-top: 1px solid #eef2f6;
+        }
+
+        .btn-secondary {
+            background: white;
+            border: 1px solid #cbd5e1;
+            padding: 8px 20px;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .btn-save {
+            background: #2c5f8a;
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .btn-save:hover {
+            background: #1e4668;
+        }
+
+        .toast-msg {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1e293b;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 40px;
+            font-size: 0.85rem;
+            z-index: 1100;
+            opacity: 0;
+            transition: opacity 0.2s;
+            pointer-events: none;
+        }
+
+        .scope-preview {
+            font-size: 0.75rem;
+            color: #5b6e8c;
+            margin-top: 8px;
+            background: #f8fafc;
+            padding: 6px 10px;
+            border-radius: 12px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <div class="title-section">
+            <h1>🔐 行级权限控制台</h1>
+            <p>岗位 + 用户类型 → 客户/项目/产品数据范围（信托行业模型）</p>
+        </div>
+    </div>
+
+    <div class="card">
+        <table class="user-table">
+            <thead>
+                <tr>
+                    <th>员工八位码</th><th>姓名</th><th>所属部门</th><th>岗位</th><th>用户类型</th><th>数据范围简述（客户 / 项目 / 产品）</th><th>操作</th>
+                </tr>
+            </thead>
+            <tbody id="userTableBody"></tbody>
+        </table>
+    </div>
+    <div style="margin-top: 20px; font-size: 0.75rem; text-align: center; color: #94a3b8;">
+        💡 规则：理财经理(客户按类型+产品全量+项目关联)；信托经理(项目按类型+客户/产品仅关联项目)；投资经理/风控合规/管理层按矩阵权限。
+    </div>
+</div>
+
+<!-- 编辑模态框 -->
+<div id="permissionModal" class="modal-overlay">
+    <div class="modal">
+        <div class="modal-header">
+            <h3 id="modalTitle">编辑行级权限</h3>
+            <button class="modal-close" id="closeModalBtn">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="info-banner" id="modalUserInfo"></div>
+            <form id="permForm">
+                <input type="hidden" id="editUserId">
+                <div class="form-group">
+                    <label>虚拟岗位</label>
+                    <select id="virtualRole" required>
+                        <option value="FIN_MGR">理财经理</option>
+                        <option value="TRU_MGR">信托经理</option>
+                        <option value="INV_MGR">投资经理</option>
+                        <option value="RISK">风控合规</option>
+                        <option value="MGMT">管理层</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>用户类型（数据层级）</label>
+                    <select id="userLevel" required>
+                        <option value="L1">本人</option>
+                        <option value="L2">本三级部门</option>
+                        <option value="L3">本二级部门</option>
+                        <option value="L4">本一级部门</option>
+                        <option value="L5">全公司</option>
+                    </select>
+                    <div class="scope-preview" id="scopePreview">
+                        <!-- 动态预览权限范围 -->
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-secondary" id="cancelModalBtn">取消</button>
+            <button class="btn-save" id="savePermBtn">保存配置</button>
+        </div>
+    </div>
+</div>
+<div id="toastMsg" class="toast-msg"></div>
+
+<script>
+    // ---------- 部门层级模拟（一级/二级/三级）----------
+    const departments = {
+        "DEPT_A1": { name: "财富管理总部", level: "一级", parent: null, children: ["DEPT_B1", "DEPT_B2"] },
+        "DEPT_B1": { name: "零售金融部", level: "二级", parent: "DEPT_A1", children: ["DEPT_C1", "DEPT_C2"] },
+        "DEPT_B2": { name: "家族信托部", level: "二级", parent: "DEPT_A1", children: ["DEPT_C3"] },
+        "DEPT_C1": { name: "个人信贷科", level: "三级", parent: "DEPT_B1", children: [] },
+        "DEPT_C2": { name: "财富规划科", level: "三级", parent: "DEPT_B1", children: [] },
+        "DEPT_C3": { name: "跨代传承科", level: "三级", parent: "DEPT_B2", children: [] },
+        "DEPT_A2": { name: "资产管理总部", level: "一级", parent: null, children: ["DEPT_B3", "DEPT_B4"] },
+        "DEPT_B3": { name: "股权投资部", level: "二级", parent: "DEPT_A2", children: ["DEPT_C4"] },
+        "DEPT_B4": { name: "固收投资部", level: "二级", parent: "DEPT_A2", children: ["DEPT_C5"] },
+        "DEPT_C4": { name: "并购重组科", level: "三级", parent: "DEPT_B3", children: [] },
+        "DEPT_C5": { name: "债券交易科", level: "三级", parent: "DEPT_B4", children: [] },
+        "DEPT_ADMIN": { name: "总裁办公室", level: "一级", parent: null, children: [] }
+    };
+
+    // ---------- 用户 Mock (根据最新的权限矩阵调整数据范围描述) ----------
+    let users = [
+        { id: "EMP001", name: "张财富", deptCode: "DEPT_C1", virtualRole: "FIN_MGR", userType: "L1" },
+        { id: "EMP002", name: "李信托", deptCode: "DEPT_C3", virtualRole: "TRU_MGR", userType: "L2" },
+        { id: "EMP003", name: "王投资", deptCode: "DEPT_C4", virtualRole: "INV_MGR", userType: "L5" },
+        { id: "EMP004", name: "赵风控", deptCode: "DEPT_ADMIN", virtualRole: "RISK", userType: "L5" },
+        { id: "EMP005", name: "钱管理", deptCode: "DEPT_A1", virtualRole: "MGMT", userType: "L4" },
+        { id: "EMP006", name: "孙零售", deptCode: "DEPT_C2", virtualRole: "FIN_MGR", userType: "L3" },
+        { id: "EMP007", name: "周宗族", deptCode: "DEPT_C3", virtualRole: "TRU_MGR", userType: "L4" }
+    ];
+
+    const roleMap = {
+        "FIN_MGR": "理财经理", "TRU_MGR": "信托经理", "INV_MGR": "投资经理", "RISK": "风控合规", "MGMT": "管理层"
+    };
+    const typeNameMap = {
+        "L1": "本人", "L2": "本三级部门", "L3": "本二级部门", "L4": "本一级部门", "L5": "全公司"
+    };
+
+    // ----- 核心权限矩阵描述（根据业务规则）-----
+    function getScopeDescription(roleCode, userType, deptCode) {
+        const dept = departments[deptCode] || { name: "未知部门", level: "三级" };
+        const typeLabel = typeNameMap[userType];
+        
+        // 投资经理
+        if (roleCode === "INV_MGR") {
+            return "客户不可见；所有项目可见；所有产品可见";
+        }
+        // 风控合规
+        if (roleCode === "RISK") {
+            return "全公司客户数据可见；全公司项目可见；全公司产品可见";
+        }
+        // 管理层(汇总数据)
+        if (roleCode === "MGMT") {
+            if (userType === "L1" || userType === "L2") return "本部门业绩汇总数据";
+            if (userType === "L3") return "本部门及下级部门业绩汇总数据";
+            if (userType === "L4") return "一级部门及下级部门业绩汇总数据";
+            return "全公司经营汇总数据";
+        }
+        // 理财经理
+        if (roleCode === "FIN_MGR") {
+            let clientRange = "";
+            if (userType === "L1") clientRange = "仅自己名下客户";
+            else if (userType === "L2") clientRange = `${dept.name}（三级部门）内所有理财经理名下客户`;
+            else if (userType === "L3") clientRange = `${dept.name}（二级部门）及下级部门内所有理财经理名下客户`;
+            else if (userType === "L4") clientRange = `${dept.name}（一级部门）及下级部门内所有理财经理名下客户`;
+            else clientRange = "全公司所有理财经理名下客户";
+            return `客户:${clientRange}；项目:在售/在运项目(基础信息)；产品:所有产品`;
+        }
+        // 信托经理
+        if (roleCode === "TRU_MGR") {
+            let projRange = "";
+            if (userType === "L1") projRange = "仅自己负责的项目";
+            else if (userType === "L2") projRange = `${dept.name}（三级部门）内所有信托经理负责的项目`;
+            else if (userType === "L3") projRange = `${dept.name}（二级部门）及下级部门内所有信托经理负责的项目`;
+            else if (userType === "L4") projRange = `${dept.name}（一级部门）及下级部门内所有信托经理负责的项目`;
+            else projRange = "全公司所有信托经理负责的项目";
+            return `客户:仅项目相关客户；项目:${projRange}(全字段)；产品:仅项目对应产品`;
+        }
+        return "组合权限";
+    }
+
+    // 提供更详细的预览（在弹窗内展示客户/项目/产品三维度）
+    function getDetailedPreview(roleCode, userType, deptCode) {
+        const dept = departments[deptCode] || { name: "当前部门", level: "三级" };
+        if (roleCode === "INV_MGR") {
+            return `📋 权限预览：客户数据不可见 / 项目数据可查看【所有项目】 / 产品数据可查看【所有产品】`;
+        }
+        if (roleCode === "RISK") {
+            return `📋 权限预览：具有全公司客户、项目、产品的完整查看权限（无行级限制）`;
+        }
+        if (roleCode === "MGMT") {
+            let range = "";
+            if (userType === "L1" || userType === "L2") range = "本部门";
+            else if (userType === "L3") range = "本部门及下级部门";
+            else if (userType === "L4") range = "一级部门及下级部门";
+            else range = "全公司";
+            return `📋 权限预览：可查看【${range}】客户/项目/产品汇总经营数据（脱敏明细不可见）`;
+        }
+        if (roleCode === "FIN_MGR") {
+            let clientExpr = "";
+            if (userType === "L1") clientExpr = "仅自己名下客户";
+            else if (userType === "L2") clientExpr = `${dept.name}内所有理财经理名下客户`;
+            else if (userType === "L3") clientExpr = `${dept.name}(二级部门)及下级部门理财经理名下客户`;
+            else if (userType === "L4") clientExpr = `${dept.name}(一级部门)及下级部门理财经理名下客户`;
+            else clientExpr = "全公司理财经理名下客户";
+            return `📋 权限预览：客户数据→${clientExpr}；项目数据→在售/在运项目(不含利润成本)；产品数据→所有产品`;
+        }
+        if (roleCode === "TRU_MGR") {
+            let projExpr = "";
+            if (userType === "L1") projExpr = "仅自己负责的项目";
+            else if (userType === "L2") projExpr = `${dept.name}内所有信托经理负责的项目`;
+            else if (userType === "L3") projExpr = `${dept.name}(二级部门)及下级部门信托经理项目`;
+            else if (userType === "L4") projExpr = `${dept.name}(一级部门)及下级部门信托经理项目`;
+            else projExpr = "全公司信托经理负责的项目";
+            return `📋 权限预览：客户数据→仅项目相关客户；项目数据→${projExpr}(完整字段含利润成本)；产品数据→仅项目对应产品`;
+        }
+        return "权限配置有效";
+    }
+
+    // 渲染主表格
+    function renderTable() {
+        const tbody = document.getElementById('userTableBody');
+        tbody.innerHTML = '';
+        users.forEach(user => {
+            const deptInfo = departments[user.deptCode] || { name: "未知部门" };
+            const scopeText = getScopeDescription(user.virtualRole, user.userType, user.deptCode);
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${user.id}</strong></td>
+                <td>${user.name}</strong></td>
+                <td>${deptInfo.name} (${deptInfo.level || '部门'})</td>
+                <td><span class="badge">${roleMap[user.virtualRole]}</span></td>
+                <td><span class="badge type-tag">${typeNameMap[user.userType]}</span></td>
+                <td style="font-size:0.8rem; max-width: 380px;">${scopeText}</td>
+                <td><button class="edit-link" data-id="${user.id}">✏️ 编辑</button></td>
+            `;
+            tbody.appendChild(row);
+        });
+        document.querySelectorAll('.edit-link').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const userId = btn.getAttribute('data-id');
+                openEditModal(userId);
+            });
+        });
+    }
+
+    let currentEditId = null;
+    function openEditModal(userId) {
+        const user = users.find(u => u.id === userId);
+        if (!user) return;
+        currentEditId = userId;
+        const deptInfo = departments[user.deptCode] || { name: "未知部门" };
+        const currentScopeDesc = getScopeDescription(user.virtualRole, user.userType, user.deptCode);
+        document.getElementById('modalUserInfo').innerHTML = `
+            <div><strong>${user.name}</strong> (${user.id})</div>
+            <div>部门：${deptInfo.name}（${deptInfo.level || '三级'}）</div>
+            <div style="margin-top:6px; border-top:1px dashed #cbdbe0; padding-top:6px;">🔐 当前范围：${currentScopeDesc}</div>
+        `;
+        document.getElementById('virtualRole').value = user.virtualRole;
+        document.getElementById('userLevel').value = user.userType;
+        updatePreview();
+        document.getElementById('permissionModal').classList.add('active');
+    }
+
+    function updatePreview() {
+        const role = document.getElementById('virtualRole').value;
+        const level = document.getElementById('userLevel').value;
+        // 获取当前编辑用户的部门 (为了动态预览)
+        if (currentEditId) {
+            const user = users.find(u => u.id === currentEditId);
+            if (user) {
+                const previewHtml = getDetailedPreview(role, level, user.deptCode);
+                const previewDiv = document.getElementById('scopePreview');
+                if (previewDiv) previewDiv.innerHTML = previewHtml;
+                return;
+            }
+        }
+        // fallback
+        const previewDiv = document.getElementById('scopePreview');
+        if (previewDiv) previewDiv.innerHTML = getDetailedPreview(role, level, "DEPT_C1");
+    }
+
+    function closeModal() {
+        document.getElementById('permissionModal').classList.remove('active');
+        currentEditId = null;
+    }
+
+    function savePermission() {
+        if (!currentEditId) {
+            showToast('未选中用户', 'error');
+            return;
+        }
+        const newRole = document.getElementById('virtualRole').value;
+        const newLevel = document.getElementById('userLevel').value;
+        const idx = users.findIndex(u => u.id === currentEditId);
+        if (idx !== -1) {
+            users[idx].virtualRole = newRole;
+            users[idx].userType = newLevel;
+            renderTable();
+            showToast(`✅ 已更新 ${users[idx].name} 权限 (${roleMap[newRole]} + ${typeNameMap[newLevel]})`, 'success');
+        } else {
+            showToast('用户不存在', 'error');
+        }
+        closeModal();
+    }
+
+    function showToast(msg, type = 'info') {
+        const toast = document.getElementById('toastMsg');
+        toast.innerText = msg;
+        toast.style.backgroundColor = type === 'error' ? '#b91c1c' : '#1e293b';
+        toast.style.opacity = '1';
+        setTimeout(() => toast.style.opacity = '0', 2500);
+    }
+
+    // 监听表单事件
+    document.getElementById('virtualRole')?.addEventListener('change', updatePreview);
+    document.getElementById('userLevel')?.addEventListener('change', updatePreview);
+    document.getElementById('closeModalBtn')?.addEventListener('click', closeModal);
+    document.getElementById('cancelModalBtn')?.addEventListener('click', closeModal);
+    document.getElementById('savePermBtn')?.addEventListener('click', savePermission);
+    const modalOverlay = document.getElementById('permissionModal');
+    modalOverlay?.addEventListener('click', (e) => { if (e.target === modalOverlay) closeModal(); });
+
+    // 初始化
+    renderTable();
+</script>
+</body>
+</html>

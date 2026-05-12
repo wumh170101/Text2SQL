@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>AI中台 - 智能体管理（白名单精细化配置）</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            background: #eef2f6;
+            color: #1a2c3e;
+            padding: 32px;
+        }
+
+        .agent-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: #fff;
+            border-radius: 28px;
+            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+        }
+
+        .agent-header {
+            padding: 24px 32px 16px 32px;
+            border-bottom: 1px solid #eef2f8;
+        }
+
+        .agent-header h1 {
+            font-size: 26px;
+            font-weight: 600;
+            color: #0f2f3f;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .agent-header p {
+            color: #5e7e97;
+            font-size: 14px;
+            margin-top: 6px;
+        }
+
+        .badge-env {
+            background: #eaf2f9;
+            padding: 4px 12px;
+            border-radius: 40px;
+            font-size: 13px;
+            font-weight: normal;
+        }
+
+        .toolbar {
+            padding: 20px 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #edf2f8;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .search-box {
+            display: flex;
+            align-items: center;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 40px;
+            padding: 6px 16px;
+            gap: 8px;
+        }
+
+        .search-box input {
+            border: none;
+            background: transparent;
+            padding: 8px 0;
+            width: 240px;
+            outline: none;
+            font-size: 14px;
+        }
+
+        .btn-primary {
+            background: #1f6e9c;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 32px;
+            color: white;
+            font-weight: 500;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: 0.2s;
+        }
+
+        .btn-primary:hover {
+            background: #0d5780;
+        }
+
+        .btn-outline {
+            background: white;
+            border: 1px solid #cbdde9;
+            padding: 8px 20px;
+            border-radius: 32px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .agent-table-wrapper {
+            padding: 0 32px 32px 32px;
+        }
+
+        .agent-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .agent-table th {
+            text-align: left;
+            padding: 16px 12px;
+            background: #f9fbfe;
+            font-weight: 600;
+            font-size: 13px;
+            color: #2c4e6e;
+            border-bottom: 1px solid #e4ecf3;
+        }
+
+        .agent-table td {
+            padding: 18px 12px;
+            border-bottom: 1px solid #eff3f8;
+            vertical-align: middle;
+            font-size: 14px;
+        }
+
+        .agent-name {
+            font-weight: 600;
+            color: #1d5b85;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: #e6f7e6;
+            color: #1e7a44;
+            padding: 4px 12px;
+            border-radius: 40px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .status-badge.inactive {
+            background: #f0f2f5;
+            color: #6c7c8c;
+        }
+
+        .action-icons {
+            display: flex;
+            gap: 12px;
+        }
+
+        .action-icon {
+            cursor: pointer;
+            opacity: 0.6;
+            transition: 0.1s;
+            font-size: 18px;
+        }
+
+        .action-icon:hover {
+            opacity: 1;
+        }
+
+        .modal-mask {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            visibility: hidden;
+            opacity: 0;
+            transition: 0.2s;
+        }
+
+        .modal-mask.active {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .modal-container {
+            background: white;
+            width: 600px;
+            max-width: 90%;
+            border-radius: 28px;
+            box-shadow: 0 30px 40px rgba(0,0,0,0.2);
+            transform: scale(0.96);
+            transition: transform 0.2s;
+        }
+
+        .modal-mask.active .modal-container {
+            transform: scale(1);
+        }
+
+        .modal-header {
+            padding: 20px 28px 12px 28px;
+            border-bottom: 1px solid #eef2f8;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h3 {
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 28px;
+            cursor: pointer;
+            color: #8ba0b0;
+        }
+
+        .modal-body {
+            padding: 24px 28px;
+            max-height: 60vh;
+            overflow-y: auto;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 8px;
+            font-size: 13px;
+            color: #2c4e6e;
+        }
+
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid #cfdfed;
+            border-radius: 16px;
+            font-size: 14px;
+            outline: none;
+        }
+
+        .whitelist-tag {
+            background: #eef2fa;
+            padding: 4px 10px;
+            border-radius: 24px;
+            font-size: 12px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin: 4px 6px 4px 0;
+        }
+
+        .add-tag-btn {
+            background: none;
+            border: 1px dashed #9bb8d0;
+            padding: 4px 12px;
+            border-radius: 30px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        .modal-footer {
+            padding: 16px 28px 24px;
+            border-top: 1px solid #eef2f8;
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 32px;
+            right: 32px;
+            background: #1f2f3c;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 40px;
+            font-size: 13px;
+            opacity: 0;
+            transition: 0.2s;
+            z-index: 1100;
+        }
+    </style>
+</head>
+<body>
+<div class="agent-container">
+    <div class="agent-header">
+        <h1>
+            🤖 智能体管理
+            <span class="badge-env">AI中台 · 白名单权限配置</span>
+        </h1>
+        <p>管理智能体（智能问数助手、Prompt助手）访问权限。白名单支持按「用户」或「角色」粒度控制，精确到功能入口可见性。</p>
+    </div>
+
+    <div class="toolbar">
+        <div class="search-box">
+            <span>🔍</span>
+            <input type="text" id="searchInput" placeholder="按智能体名称搜索...">
+        </div>
+        <button class="btn-primary" id="createAgentBtn">+ 新建智能体</button>
+    </div>
+
+    <div class="agent-table-wrapper">
+        <table class="agent-table">
+            <thead>
+                <tr><th>智能体名称</th><th>描述</th><th>白名单类型</th><th>白名单内容</th><th>状态</th><th>操作</th></tr>
+            </thead>
+            <tbody id="agentTableBody"></tbody>
+         </>
+    </div>
+</div>
+
+<!-- 编辑/新建弹窗 -->
+<div id="agentModal" class="modal-mask">
+    <div class="modal-container">
+        <div class="modal-header">
+            <h3 id="modalTitle">编辑智能体</h3>
+            <button class="modal-close" id="closeModalBtn">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+                <label>智能体名称 *</label>
+                <input type="text" id="agentName" placeholder="例如: 智能问数助手">
+            </div>
+            <div class="form-group">
+                <label>描述</label>
+                <textarea id="agentDesc" rows="2" placeholder="功能描述..."></textarea>
+            </div>
+            <div class="form-group">
+                <label>白名单类型</label>
+                <select id="whitelistType">
+                    <option value="user">用户（指定用户ID/员工八位码）</option>
+                    <option value="role">角色（理财经理/信托经理等）</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>白名单列表</label>
+                <div id="whitelistContainer" style="border:1px solid #e9edf2; border-radius: 20px; padding: 12px; background:#fefefe;">
+                    <div id="whitelistTags" style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px;"></div>
+                    <div style="display: flex; gap: 8px;">
+                        <input type="text" id="whitelistInput" placeholder="输入用户ID / 角色名" style="flex:1; border-radius: 30px;">
+                        <button id="addWhitelistItemBtn" class="add-tag-btn">添加</button>
+                    </div>
+                </div>
+                <div style="font-size: 12px; color: #6f8fae; margin-top: 8px;">💡 多个条目可分别添加，保存后立即生效，控制入口可见性。</div>
+            </div>
+            <div class="form-group">
+                <label>状态</label>
+                <select id="agentStatus">
+                    <option value="active">启用</option>
+                    <option value="inactive">停用</option>
+                </select>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-outline" id="cancelModalBtn">取消</button>
+            <button class="btn-primary" id="saveAgentBtn">保存配置</button>
+        </div>
+    </div>
+</div>
+<div id="toastMsg" class="toast"></div>
+
+<script>
+    // ---------- MOCK 数据修正：仅展示“智能问数助手”和“Prompt助手” ----------
+    let agents = [
+        {
+            id: "agent_001",
+            name: "智能问数助手",
+            description: "自然语言查询数据资产，支持客户/产品/项目分析，需按用户粒度授权（员工八位码）",
+            whitelistType: "user",
+            whitelist: ["EMP00123", "EMP04567", "EMP08912"],      // 模拟员工八位码
+            status: "active"
+        },
+        {
+            id: "agent_002",
+            name: "Prompt 助手",
+            description: "辅助编写AI提示词、优化Prompt模板，按角色授予权限",
+            whitelistType: "role",
+            whitelist: ["理财经理", "信托经理", "风控合规", "管理层"],
+            status: "active"
+        }
+    ];
+
+    let currentEditId = null;          // 正在编辑的智能体ID，null表示新建
+    let currentWhitelist = [];          // 当前弹窗内的白名单数组
+
+    // DOM 元素
+    const searchInput = document.getElementById('searchInput');
+    const tbody = document.getElementById('agentTableBody');
+    const modal = document.getElementById('agentModal');
+    const modalTitle = document.getElementById('modalTitle');
+    const agentNameInput = document.getElementById('agentName');
+    const agentDescInput = document.getElementById('agentDesc');
+    const whitelistTypeSelect = document.getElementById('whitelistType');
+    const agentStatusSelect = document.getElementById('agentStatus');
+    const whitelistTagsDiv = document.getElementById('whitelistTags');
+    const whitelistInput = document.getElementById('whitelistInput');
+    const addWhitelistBtn = document.getElementById('addWhitelistItemBtn');
+
+    // 提示
+    function showToast(msg, isError = false) {
+        const toast = document.getElementById('toastMsg');
+        toast.textContent = msg;
+        toast.style.opacity = '1';
+        toast.style.background = isError ? '#c23d2e' : '#1f2f3c';
+        setTimeout(() => {
+            toast.style.opacity = '0';
+        }, 2000);
+    }
+
+    // 转义
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+
+    // 渲染智能体列表
+    function renderAgentList() {
+        const keyword = searchInput.value.trim().toLowerCase();
+        let filtered = agents.filter(agent => agent.name.toLowerCase().includes(keyword));
+        tbody.innerHTML = '';
+        filtered.forEach(agent => {
+            const row = document.createElement('tr');
+            // 名称
+            const tdName = document.createElement('td');
+            tdName.innerHTML = `<span class="agent-name">${escapeHtml(agent.name)}</span>`;
+            // 描述
+            const tdDesc = document.createElement('td');
+            tdDesc.innerText = agent.description || '—';
+            // 白名单类型展示
+            const tdType = document.createElement('td');
+            tdType.innerText = agent.whitelistType === 'user' ? '用户' : '角色';
+            // 白名单摘要
+            const tdWhitelist = document.createElement('td');
+            tdWhitelist.innerText = agent.whitelist.slice(0, 3).join(', ') + (agent.whitelist.length > 3 ? '…' : '');
+            // 状态
+            const tdStatus = document.createElement('td');
+            tdStatus.innerHTML = `<span class="status-badge ${agent.status === 'active' ? '' : 'inactive'}">${agent.status === 'active' ? '● 启用' : '○ 停用'}</span>`;
+            // 操作按钮
+            const tdActions = document.createElement('td');
+            tdActions.className = 'action-icons';
+            tdActions.innerHTML = `
+                <span class="action-icon edit-agent" data-id="${agent.id}">✏️</span>
+                <span class="action-icon delete-agent" data-id="${agent.id}">🗑️</span>
+            `;
+            row.appendChild(tdName);
+            row.appendChild(tdDesc);
+            row.appendChild(tdType);
+            row.appendChild(tdWhitelist);
+            row.appendChild(tdStatus);
+            row.appendChild(tdActions);
+            tbody.appendChild(row);
+        });
+
+        // 绑定编辑、删除事件
+        document.querySelectorAll('.edit-agent').forEach(el => {
+            el.addEventListener('click', (e) => {
+                const id = el.getAttribute('data-id');
+                openEditModal(id);
+            });
+        });
+        document.querySelectorAll('.delete-agent').forEach(el => {
+            el.addEventListener('click', (e) => {
+                const id = el.getAttribute('data-id');
+                if (confirm('确认删除该智能体吗？删除后相关白名单将失效。')) {
+                    agents = agents.filter(a => a.id !== id);
+                    renderAgentList();
+                    showToast('已删除智能体');
+                }
+            });
+        });
+    }
+
+    // 渲染当前弹窗里的白名单标签
+    function renderWhitelistTags() {
+        if (!whitelistTagsDiv) return;
+        whitelistTagsDiv.innerHTML = '';
+        currentWhitelist.forEach((item, idx) => {
+            const tag = document.createElement('span');
+            tag.className = 'whitelist-tag';
+            tag.innerHTML = `${escapeHtml(item)} <span style="cursor:pointer; margin-left:6px;" data-idx="${idx}" class="remove-tag">✖</span>`;
+            whitelistTagsDiv.appendChild(tag);
+        });
+        // 绑定删除标签事件
+        document.querySelectorAll('.remove-tag').forEach(el => {
+            el.addEventListener('click', (e) => {
+                const idx = parseInt(el.getAttribute('data-idx'));
+                if (!isNaN(idx)) {
+                    currentWhitelist.splice(idx, 1);
+                    renderWhitelistTags();
+                }
+            });
+        });
+    }
+
+    // 打开新建/编辑弹窗
+    function openEditModal(agentId = null) {
+        currentEditId = agentId;
+        if (agentId) {
+            const agent = agents.find(a => a.id === agentId);
+            if (agent) {
+                modalTitle.innerText = '编辑智能体';
+                agentNameInput.value = agent.name;
+                agentDescInput.value = agent.description || '';
+                whitelistTypeSelect.value = agent.whitelistType;
+                agentStatusSelect.value = agent.status;
+                currentWhitelist = [...agent.whitelist];
+            } else {
+                closeModal();
+                return;
+            }
+        } else {
+            modalTitle.innerText = '新建智能体';
+            agentNameInput.value = '';
+            agentDescInput.value = '';
+            whitelistTypeSelect.value = 'role';
+            agentStatusSelect.value = 'active';
+            currentWhitelist = [];
+        }
+        renderWhitelistTags();
+        modal.classList.add('active');
+    }
+
+    function closeModal() {
+        modal.classList.remove('active');
+        currentEditId = null;
+        currentWhitelist = [];
+    }
+
+    // 保存智能体
+    function saveAgent() {
+        const name = agentNameInput.value.trim();
+        if (!name) {
+            showToast('请输入智能体名称', true);
+            return;
+        }
+        const description = agentDescInput.value;
+        const whitelistType = whitelistTypeSelect.value;
+        const status = agentStatusSelect.value;
+        const whitelist = [...currentWhitelist];
+
+        if (whitelist.length === 0) {
+            showToast('请至少添加一个白名单条目（用户ID/角色名）', true);
+            return;
+        }
+
+        if (currentEditId) {
+            // 更新现有智能体
+            const index = agents.findIndex(a => a.id === currentEditId);
+            if (index !== -1) {
+                agents[index] = {
+                    ...agents[index],
+                    name: name,
+                    description: description,
+                    whitelistType: whitelistType,
+                    whitelist: whitelist,
+                    status: status
+                };
+                showToast('智能体已更新');
+            } else {
+                showToast('未找到该智能体', true);
+                closeModal();
+                return;
+            }
+        } else {
+            // 新建智能体
+            const newId = 'agent_' + Date.now() + '_' + Math.random().toString(36).substr(2, 8);
+            agents.push({
+                id: newId,
+                name: name,
+                description: description,
+                whitelistType: whitelistType,
+                whitelist: whitelist,
+                status: status
+            });
+            showToast('新建智能体成功');
+        }
+        renderAgentList();
+        closeModal();
+    }
+
+    // 添加白名单项
+    function addWhitelistItem() {
+        const val = whitelistInput.value.trim();
+        if (!val) {
+            showToast('请输入内容', true);
+            return;
+        }
+        if (currentWhitelist.includes(val)) {
+            showToast('该项已存在', true);
+            return;
+        }
+        currentWhitelist.push(val);
+        renderWhitelistTags();
+        whitelistInput.value = '';
+    }
+
+    // 事件绑定
+    document.getElementById('createAgentBtn').addEventListener('click', () => openEditModal(null));
+    document.getElementById('closeModalBtn').addEventListener('click', closeModal);
+    document.getElementById('cancelModalBtn').addEventListener('click', closeModal);
+    document.getElementById('saveAgentBtn').addEventListener('click', saveAgent);
+    addWhitelistBtn.addEventListener('click', addWhitelistItem);
+    whitelistInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') addWhitelistItem();
+    });
+    searchInput.addEventListener('input', () => renderAgentList());
+
+    // 初始渲染
+    renderAgentList();
+</script>
+</body>
+</html>
