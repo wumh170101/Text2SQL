@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>引导引擎·追问模板库 | 意图/结果特征/角色规则</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            background: #f1f5f9;
+            color: #0f2b3d;
+            padding: 32px 28px;
+        }
+
+        .config-container {
+            max-width: 1500px;
+            margin: 0 auto;
+        }
+
+        .page-header {
+            margin-bottom: 28px;
+        }
+
+        .page-header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #1f5e7e, #1e3a5f);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+        }
+
+        .page-header p {
+            color: #5c6f87;
+            margin-top: 6px;
+            font-size: 14px;
+        }
+
+        .three-col {
+            display: flex;
+            gap: 24px;
+            flex-wrap: wrap;
+        }
+
+        .card {
+            background: white;
+            border-radius: 28px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.04);
+            border: 1px solid #e4ecf3;
+            overflow: hidden;
+            flex: 1;
+            min-width: 300px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card-header {
+            padding: 20px 24px 12px 24px;
+            border-bottom: 1px solid #eef2f8;
+            background: #ffffff;
+        }
+
+        .card-header h2 {
+            font-size: 20px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .badge {
+            background: #ecf3fa;
+            font-size: 12px;
+            padding: 4px 10px;
+            border-radius: 40px;
+            font-weight: normal;
+            color: #2c6e9c;
+        }
+
+        .list-area {
+            padding: 20px 24px;
+            flex: 1;
+            overflow-y: auto;
+            max-height: 520px;
+        }
+
+        .rule-item {
+            background: #fafdff;
+            border-radius: 20px;
+            padding: 14px 16px;
+            margin-bottom: 16px;
+            border: 1px solid #e9edf2;
+        }
+
+        .rule-key {
+            font-weight: 700;
+            font-size: 14px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .rule-template {
+            font-family: monospace;
+            font-size: 12px;
+            background: #f5f9fe;
+            padding: 8px 12px;
+            border-radius: 18px;
+            margin-top: 8px;
+            color: #1c5775;
+            white-space: pre-wrap;
+        }
+
+        .btn-icon {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            padding: 4px 6px;
+            border-radius: 20px;
+            transition: 0.1s;
+        }
+
+        .btn-icon:hover {
+            background: #e9eff5;
+        }
+
+        .add-btn {
+            margin-top: 8px;
+            width: 100%;
+            background: #f8fafc;
+            border: 1px dashed #bdd4e7;
+            border-radius: 40px;
+            padding: 10px;
+            font-size: 13px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .global-panel {
+            margin-top: 28px;
+            background: white;
+            border-radius: 28px;
+            border: 1px solid #e4ecf3;
+            padding: 20px 28px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .strategy-group {
+            display: flex;
+            gap: 24px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .btn-save {
+            background: #1f6e9c;
+            border: none;
+            padding: 8px 28px;
+            border-radius: 32px;
+            color: white;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .toast-msg {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1e2a3a;
+            color: white;
+            padding: 8px 22px;
+            border-radius: 40px;
+            font-size: 13px;
+            opacity: 0;
+            transition: 0.2s;
+            z-index: 1100;
+            pointer-events: none;
+        }
+
+        .code-hint {
+            font-size: 11px;
+            color: #6d8eb0;
+            margin-top: 6px;
+        }
+
+        textarea {
+            width: 100%;
+            border-radius: 20px;
+            border: 1px solid #cfdfed;
+            padding: 8px 12px;
+            font-size: 12px;
+            font-family: monospace;
+            resize: vertical;
+        }
+    </style>
+</head>
+<body>
+<div class="config-container">
+    <div class="page-header">
+        <h1>⚡ 引导引擎 · 追问模板库</h1>
+        <p>基于「预定义模板 + 变量替换」生成追问 | 三大类规则：意图 / 结果特征 / 角色，独立配置</p>
+    </div>
+
+    <div class="three-col">
+        <!-- 1. 意图规则卡片 -->
+        <div class="card">
+            <div class="card-header">
+                <h2>🎯 意图规则 <span class="badge">基于意图类型生成追问</span></h2>
+            </div>
+            <div class="list-area" id="intentRulesContainer"></div>
+            <div style="padding: 0 24px 20px 24px;">
+                <button class="add-btn" id="addIntentRuleBtn">+ 新增意图规则</button>
+            </div>
+        </div>
+
+        <!-- 2. 结果特征规则卡片 -->
+        <div class="card">
+            <div class="card-header">
+                <h2>📊 结果特征规则 <span class="badge">基于数据特征生成追问</span></h2>
+            </div>
+            <div class="list-area" id="resultRulesContainer"></div>
+            <div style="padding: 0 24px 20px 24px;">
+                <button class="add-btn" id="addResultRuleBtn">+ 新增结果特征规则</button>
+            </div>
+        </div>
+
+        <!-- 3. 角色规则卡片 -->
+        <div class="card">
+            <div class="card-header">
+                <h2>👥 角色规则 <span class="badge">基于用户岗位生成追问</span></h2>
+            </div>
+            <div class="list-area" id="roleRulesContainer"></div>
+            <div style="padding: 0 24px 20px 24px;">
+                <button class="add-btn" id="addRoleRuleBtn">+ 新增角色规则</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 全局策略栏 -->
+    <div class="global-panel">
+        <div class="strategy-group">
+            <label>优先级顺序:
+                <select id="priorityOrder">
+                    <option value="resultFirst">结果特征优先 > 意图 > 角色</option>
+                    <option value="intentFirst">意图优先 > 结果特征 > 角色</option>
+                    <option value="roleFirst">角色优先 > 意图 > 结果特征</option>
+                </select>
+            </label>
+            <label>最多追问: <input type="number" id="maxSuggestions" value="3" min="1" max="5" style="width:70px;"></label>
+            <label><input type="checkbox" id="dedupByHistory" checked> 去重(不与历史问题重复)</label>
+            <label><input type="checkbox" id="autoHideOnTyping" checked> 输入时自动隐藏</label>
+        </div>
+        <button class="btn-save" id="saveGlobalBtn">💾 保存全局策略</button>
+    </div>
+    <div class="code-hint" style="margin-top: 12px; text-align: center;">
+        🧩 变量替换规则：{dimension} → 当前维度，{metric} → 指标，{timeRange} → 时间范围，{limit} → 数量。多个模板用分号(;)隔开，运行时随机或顺序展示。
+    </div>
+</div>
+<div id="toastMsg" class="toast-msg"></div>
+
+<script>
+    // ---------- 三大类规则数据 ----------
+    let intentRules = [
+        { id: "int_1", name: "金额类查询", template: "查看{dimension}明细；按{dimension}拆分；同比/环比增长" },
+        { id: "int_2", name: "排名查询", template: "查看完整榜单；查看历史排名变化" },
+        { id: "int_3", name: "趋势查询", template: "查看{timeRange}趋势图；预测未来趋势" }
+    ];
+    let resultRules = [
+        { id: "res_1", name: "hasTimeField", template: "查看{timeRange}趋势图；按周/月汇总" },
+        { id: "res_2", name: "rowsMoreThan20", template: "只看前{limit}名；按{metric}排序后展示" },
+        { id: "res_3", name: "emptyResult", template: "扩大{timeRange}范围；取消部分过滤条件" }
+    ];
+    let roleRules = [
+        { id: "role_1", name: "理财经理", template: "名下客户持仓排行；高风险客户预警；产品到期提醒" },
+        { id: "role_2", name: "信托经理", template: "项目进度跟踪；资金到位情况；风控指标监控" }
+    ];
+
+    let globalConfig = {
+        priority: "resultFirst",
+        maxSuggestions: 3,
+        dedupByHistory: true,
+        autoHideOnTyping: true
+    };
+
+    // 存储加载
+    function loadLocalData() {
+        const storedIntent = localStorage.getItem('intentRules');
+        if (storedIntent) intentRules = JSON.parse(storedIntent);
+        const storedResult = localStorage.getItem('resultRules');
+        if (storedResult) resultRules = JSON.parse(storedResult);
+        const storedRole = localStorage.getItem('roleRules');
+        if (storedRole) roleRules = JSON.parse(storedRole);
+        const storedGlobal = localStorage.getItem('globalConfigFollow');
+        if (storedGlobal) globalConfig = { ...globalConfig, ...JSON.parse(storedGlobal) };
+        renderAll();
+    }
+
+    function saveAll() {
+        localStorage.setItem('intentRules', JSON.stringify(intentRules));
+        localStorage.setItem('resultRules', JSON.stringify(resultRules));
+        localStorage.setItem('roleRules', JSON.stringify(roleRules));
+        localStorage.setItem('globalConfigFollow', JSON.stringify(globalConfig));
+    }
+
+    function showToast(msg, isError = false) {
+        const t = document.getElementById('toastMsg');
+        t.innerText = msg;
+        t.style.backgroundColor = isError ? '#b43b2e' : '#1e2a3a';
+        t.style.opacity = '1';
+        setTimeout(() => t.style.opacity = '0', 2000);
+    }
+
+    // 通用渲染单个规则列表
+    function renderRules(containerId, rules, typeLabel, onEdit, onDelete) {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+        if (rules.length === 0) {
+            container.innerHTML = `<div style="text-align:center; padding: 30px; color:#8aa3bc;">暂无规则，点击下方新增</div>`;
+            return;
+        }
+        let html = '';
+        rules.forEach(rule => {
+            html += `
+                <div class="rule-item" data-id="${rule.id}">
+                    <div class="rule-key">
+                        <span><strong>${escapeHtml(rule.name)}</strong></span>
+                        <div>
+                            <button class="btn-icon edit-rule" data-id="${rule.id}" data-type="${typeLabel}">✏️</button>
+                            <button class="btn-icon delete-rule" data-id="${rule.id}" data-type="${typeLabel}">🗑️</button>
+                        </div>
+                    </div>
+                    <textarea class="rule-template-text" data-id="${rule.id}" data-type="${typeLabel}" rows="2">${escapeHtml(rule.template)}</textarea>
+                    <div class="code-hint">支持变量: {dimension}, {metric}, {timeRange}, {limit} 。多个用分号隔开</div>
+                </div>
+            `;
+        });
+        container.innerHTML = html;
+
+        // 绑定文本域修改
+        document.querySelectorAll('.rule-template-text').forEach(ta => {
+            ta.addEventListener('change', (e) => {
+                const id = ta.getAttribute('data-id');
+                const ruleType = ta.getAttribute('data-type');
+                let rule = null;
+                if (ruleType === 'intent') rule = intentRules.find(r => r.id === id);
+                else if (ruleType === 'result') rule = resultRules.find(r => r.id === id);
+                else rule = roleRules.find(r => r.id === id);
+                if (rule) {
+                    rule.template = ta.value;
+                    saveAll();
+                    showToast(`模板已保存: ${rule.name}`);
+                }
+            });
+        });
+        // 绑定编辑/删除
+        document.querySelectorAll('.edit-rule').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const id = btn.getAttribute('data-id');
+                const ruleType = btn.getAttribute('data-type');
+                let targetList = ruleType === 'intent' ? intentRules : (ruleType === 'result' ? resultRules : roleRules);
+                let rule = targetList.find(r => r.id === id);
+                if (rule) {
+                    let newName = prompt("规则名称", rule.name);
+                    if (newName && newName.trim()) rule.name = newName.trim();
+                    saveAll();
+                    renderAll();
+                    showToast(`规则名称已更新`);
+                }
+            });
+        });
+        document.querySelectorAll('.delete-rule').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const id = btn.getAttribute('data-id');
+                const ruleType = btn.getAttribute('data-type');
+                if (confirm('删除此规则后追问将不再基于该项生成')) {
+                    if (ruleType === 'intent') intentRules = intentRules.filter(r => r.id !== id);
+                    else if (ruleType === 'result') resultRules = resultRules.filter(r => r.id !== id);
+                    else roleRules = roleRules.filter(r => r.id !== id);
+                    saveAll();
+                    renderAll();
+                    showToast("规则已删除");
+                }
+            });
+        });
+    }
+
+    function renderAll() {
+        renderRules('intentRulesContainer', intentRules, 'intent', null, null);
+        renderRules('resultRulesContainer', resultRules, 'result', null, null);
+        renderRules('roleRulesContainer', roleRules, 'role', null, null);
+        // 同步全局UI
+        document.getElementById('priorityOrder').value = globalConfig.priority;
+        document.getElementById('maxSuggestions').value = globalConfig.maxSuggestions;
+        document.getElementById('dedupByHistory').checked = globalConfig.dedupByHistory;
+        document.getElementById('autoHideOnTyping').checked = globalConfig.autoHideOnTyping;
+    }
+
+    function addRule(ruleType) {
+        let name = prompt(`请输入${ruleType === 'intent' ? '意图类型' : (ruleType === 'result' ? '结果特征标识' : '角色名称')}`);
+        if (!name) return;
+        let template = prompt("追问模板, 支持变量 {dimension}/{metric}/{timeRange}/{limit}, 多个模板用分号;隔开", "查看明细；分析趋势");
+        if (!template) return;
+        const newId = `${ruleType}_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`;
+        const newRule = { id: newId, name: name.trim(), template: template.trim() };
+        if (ruleType === 'intent') intentRules.push(newRule);
+        else if (ruleType === 'result') resultRules.push(newRule);
+        else roleRules.push(newRule);
+        saveAll();
+        renderAll();
+        showToast(`已添加${ruleType === 'intent' ? '意图' : ruleType === 'result' ? '结果特征' : '角色'}规则`);
+    }
+
+    function saveGlobal() {
+        globalConfig.priority = document.getElementById('priorityOrder').value;
+        globalConfig.maxSuggestions = parseInt(document.getElementById('maxSuggestions').value, 10);
+        globalConfig.dedupByHistory = document.getElementById('dedupByHistory').checked;
+        globalConfig.autoHideOnTyping = document.getElementById('autoHideOnTyping').checked;
+        saveAll();
+        showToast("全局策略已保存（优先级、数量、去重、隐藏规则）");
+    }
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, function(m){ if(m==='&') return '&amp;'; if(m==='<') return '&lt;'; if(m==='>') return '&gt;'; return m; });
+    }
+
+    // 绑定UI事件
+    document.getElementById('addIntentRuleBtn').addEventListener('click', () => addRule('intent'));
+    document.getElementById('addResultRuleBtn').addEventListener('click', () => addRule('result'));
+    document.getElementById('addRoleRuleBtn').addEventListener('click', () => addRule('role'));
+    document.getElementById('saveGlobalBtn').addEventListener('click', saveGlobal);
+
+    loadLocalData();
+</script>
+</body>
+</html>
