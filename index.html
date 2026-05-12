@@ -63,6 +63,68 @@
             background-position: center 55%;
             background-repeat: no-repeat;
         }
+        .admin-menu {
+            position: relative;
+        }
+        .admin-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 10px 16px;
+            background: #f0f5fc;
+            border: none;
+            border-radius: 10px;
+            color: #2e6a9e;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .admin-btn:hover {
+            background: #e2ecf8;
+        }
+        .admin-btn i {
+            font-size: 14px;
+        }
+        .admin-btn .fa-chevron-down {
+            font-size: 12px;
+            transition: transform 0.2s ease;
+        }
+        .admin-btn.active .fa-chevron-down {
+            transform: rotate(180deg);
+        }
+        .admin-submenu {
+            position: absolute;
+            top: calc(100% + 8px);
+            right: 0;
+            min-width: 160px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            padding: 8px 0;
+            display: none;
+            z-index: 100;
+        }
+        .admin-submenu.show {
+            display: block;
+        }
+        .submenu-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 16px;
+            color: #333;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+        .submenu-item:hover {
+            background: #f5f7fa;
+        }
+        .submenu-item i {
+            color: #2e6a9e;
+            font-size: 14px;
+        }
         .main-vertical {
             flex: 1;
             display: flex;
@@ -284,6 +346,23 @@
             <div class="logo-placeholder"><i class="fas fa-building-columns"></i></div>
             <span class="logo-text"></span>
         </div>
+        <div class="admin-menu">
+            <button class="admin-btn" id="adminBtn">
+                <i class="fas fa-cog"></i> 后台管理
+                <i class="fas fa-chevron-down"></i>
+            </button>
+            <div class="admin-submenu" id="adminSubmenu">
+                <div class="submenu-item" onclick="navigateTo('agentRight.html')">
+                    <i class="fas fa-user-shield"></i> 功能权限
+                </div>
+                <div class="submenu-item" onclick="navigateTo('apiRight.html')">
+                    <i class="fas fa-key"></i> 资源权限
+                </div>
+                <div class="submenu-item" onclick="navigateTo('dataRight.html')">
+                    <i class="fas fa-database"></i> 行级权限
+                </div>
+            </div>
+        </div>
         <div class="avatar-icon"></div>
     </div>
     <div class="main-vertical">
@@ -325,7 +404,28 @@
 <div class="toast" id="toast"></div>
 
 <script>
+    // 导航函数
+    function navigateTo(url) {
+        window.location.href = url;
+    }
+
     document.addEventListener('DOMContentLoaded', function() {
+        // 后台管理菜单
+        const adminBtn = document.getElementById('adminBtn');
+        const adminSubmenu = document.getElementById('adminSubmenu');
+        
+        adminBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            adminBtn.classList.toggle('active');
+            adminSubmenu.classList.toggle('show');
+        });
+        
+        // 点击其他地方关闭菜单
+        document.addEventListener('click', function() {
+            adminBtn.classList.remove('active');
+            adminSubmenu.classList.remove('show');
+        });
+        
         // 模式切换
         document.querySelectorAll('.mode-chip').forEach(chip => {
             chip.addEventListener('click', function() {
