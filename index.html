@@ -206,10 +206,10 @@
             outline: none;
             font-size: 14px;
             background: transparent;
-            color: #999;
+            color: #333;
         }
-        #questionInput::placeholder {
-            color: #bbb;
+        #questionInput.default-text {
+            color: #999;
         }
         /* 麦克风按钮 */
         .mic-btn {
@@ -361,16 +361,6 @@
                 <i class="fas fa-chevron-down"></i>
             </button>
             <div class="admin-submenu" id="adminSubmenu">
-                <div class="submenu-item" onclick="navigateTo('agentRight.html')">
-                    <i class="fas fa-user-shield"></i> 功能权限
-                </div>
-                <div class="submenu-item" onclick="navigateTo('apiRight.html')">
-                    <i class="fas fa-key"></i> 资源权限
-                </div>
-                <div class="submenu-item" onclick="navigateTo('dataRight.html')">
-                    <i class="fas fa-database"></i> 行级权限
-                </div>
-                <div class="submenu-divider"></div>
                 <div class="submenu-item" onclick="navigateTo('nextQ.html')">
                     <i class="fas fa-question-circle"></i> 追问规则配置
                 </div>
@@ -398,16 +388,16 @@
                         <option value="ai-employee">AI数字员工</option>
                         <option value="prompt-expert">Prompt专家</option>
                     </select>
-                    <input type="text" id="questionInput" placeholder="请输入您的问题...">
-                    <button class="mic-btn" id="micBtn"><i class="fas fa-microphone"></i></button>
+                    <input type="text" id="questionInput" value="查询本周过生日的客户" class="default-text" onfocus="handleInputFocus()" onblur="handleInputBlur()">
+                    <button class="mic-btn" id="micBtn" style="display: none;"><i class="fas fa-microphone"></i></button>
                     <button class="send-action" id="sendBtn"><i class="fas fa-paper-plane"></i></button>
                 </div>
                 <div class="quick-hint" id="quickHintContainer">
-                    <span class="quick-tag" data-quick="查询本周过生日的客户">🎂 本周生日</span>
-                    <span class="quick-tag" data-quick="持仓规模超过1000万的客户">💰 持仓超1000万</span>
-                    <span class="quick-tag" data-quick="风险等级分布">📊 风险分布</span>
-                    <span class="quick-tag" data-quick="客户持仓总金额排名">🏆 持仓排名</span>
-                    <span class="quick-tag" data-quick="赵司的总持仓是多少？固收和权益占比？">📌 赵司持仓</span>
+                    <span class="quick-tag" data-quick="查询本周过生日的客户">本周生日</span>
+                    <span class="quick-tag" data-quick="持仓规模超过1000万的客户">持仓超1000万</span>
+                    <span class="quick-tag" data-quick="风险等级分布">风险分布</span>
+                    <span class="quick-tag" data-quick="客户持仓总金额排名">持仓排名</span>
+                    <span class="quick-tag" data-quick="赵司的总持仓是多少？固收和权益占比？">赵司持仓</span>
                 </div>
             </div>
         </div>
@@ -420,6 +410,24 @@
     // 导航函数
     function navigateTo(url) {
         window.location.href = url;
+    }
+
+    // 输入框聚焦处理
+    function handleInputFocus() {
+        const input = document.getElementById('questionInput');
+        if (input && input.value === '查询本周过生日的客户') {
+            input.value = '';
+            input.classList.remove('default-text');
+        }
+    }
+
+    // 输入框失焦处理
+    function handleInputBlur() {
+        const input = document.getElementById('questionInput');
+        if (input && input.value === '') {
+            input.value = '查询本周过生日的客户';
+            input.classList.add('default-text');
+        }
     }
 
     document.addEventListener('DOMContentLoaded', function() {
@@ -447,11 +455,14 @@
             });
         });
 
+        
+
         // 快捷标签
         document.querySelectorAll('.quick-tag').forEach(tag => {
             tag.addEventListener('click', function() {
                 const quickText = tag.getAttribute('data-quick');
-                document.getElementById('questionInput').value = quickText;
+                inputField.value = quickText;
+                inputField.classList.remove('default-text');
                 sendMessage();
             });
         });
@@ -484,7 +495,6 @@
 
         // 麦克风语音输入功能
         const micBtn = document.getElementById('micBtn');
-        const questionInput = document.getElementById('questionInput');
         let recognition = null;
         let isRecording = false;
 
@@ -518,7 +528,7 @@
                     for (let i = event.resultIndex; i < event.results.length; i++) {
                         transcript += event.results[i][0].transcript;
                     }
-                    questionInput.value = transcript;
+                    inputField.value = transcript;
                 };
 
                 recognition.onerror = function(event) {
