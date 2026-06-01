@@ -728,6 +728,9 @@
         if(lower.includes('客户持仓总金额排名') || lower.includes('持仓金额排名')) {
             return { type:'bar', title:'客户持仓总金额排名 (万元)', labels:['赵司','林德福','周裕华','陈国富','孙立人'], values:[1260,1520,1100,980,870], summary:'林德福客户持仓总金额最高', thinking:{ userQuestion:'客户持仓金额排名是怎样的？', systemUnderstanding:'查询客户持仓金额排名', answerExplanation:'展示前5位客户的持仓金额，总金额为5730万元。' }, suggestions:['请分析前两名客户的差距原因','能查看更多排名吗','流失预警可以说明一下吗'] };
         }
+        if(lower.includes('我名下') && lower.includes('客户') && lower.includes('持仓金额')) {
+            return { type:'text', title:'查询结果', content:'您名下共有23位客户，总持仓金额为4500万元。', summary:'数据截止今日', thinking:{ userQuestion:'我名下的客户持仓金额是多少？', systemUnderstanding:'查询名下客户的总持仓金额', answerExplanation:'您名下共有23位客户，总持仓金额为4500万元。' }, suggestions:['只看前10名','按持仓金额排序','查看各客户占比'] };
+        }
         return { type:'text', title:'查询结果', content:`赵司总持仓 ¥1,260 万，其中固收类 880 万 (69.8%)，权益类 380 万 (30.2%)。`, summary:'数据截止今日', thinking:{ userQuestion:'赵司的持仓金额和类型分布是多少？', systemUnderstanding:'查询赵司的持仓金额和类型分布', answerExplanation:'赵司总持仓1260万元。其中固收类占69.8%（880万），权益类占30.2%（380万）。' }, suggestions:['能帮我分析一下配置是否合理吗','想优化这个客户的资产配置','请预测持仓变化趋势'] };
     }
 
@@ -787,11 +790,11 @@
             let textDiv = document.createElement('div'); textDiv.innerText=ans.content; textDiv.style.padding='12px 0'; contentElem=textDiv;
         }
         container.appendChild(contentElem);
-        let summary = document.createElement('div'); summary.style.cssText='font-size:13px; color:#4b6f94; margin-top:12px; border-top:1px solid #e2ecf8; padding-top:10px'; summary.innerText = `数据截止 2026/5/31 | 本回答由 AI 生成，内容仅供参考，请仔细甄别`; container.appendChild(summary);
+        let summary = document.createElement('div'); summary.style.cssText='font-size:13px; color:#4b6f94; margin-top:12px; border-top:1px solid #e2ecf8; padding-top:10px'; summary.innerText = `数据截止 2026/5/31 | 内容由AI生成，请核对`; container.appendChild(summary);
         
         if(ans.suggestions && ans.suggestions.length > 0){
             let suggestDiv = document.createElement('div'); suggestDiv.className='suggestions-area';
-            suggestDiv.innerHTML = `<div class="suggestions-label">如果需要，我可以进一步回答</div><div class="suggestions-list">${ans.suggestions.map(s => `<span class="suggestion-chip" onclick="handleSuggestionClick('${s.replace(/'/g, "\\'")}')">${s}</span>`).join('')}</div>`;
+            suggestDiv.innerHTML = `<div class="suggestions-label">您可能还想问</div><div class="suggestions-list">${ans.suggestions.map(s => `<span class="suggestion-chip" onclick="handleSuggestionClick('${s.replace(/'/g, "\\'")}')">${s}</span>`).join('')}</div>`;
             container.appendChild(suggestDiv);
         }
         
