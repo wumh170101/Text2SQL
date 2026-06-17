@@ -461,9 +461,9 @@
         document.querySelectorAll('.quick-tag').forEach(tag => {
             tag.addEventListener('click', function() {
                 const quickText = tag.getAttribute('data-quick');
-                inputField.value = quickText;
-                inputField.classList.remove('default-text');
-                sendMessage();
+                const input = document.getElementById('questionInput');
+                input.value = quickText;
+                input.classList.remove('default-text');
             });
         });
 
