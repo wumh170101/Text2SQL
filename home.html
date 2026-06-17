@@ -295,6 +295,12 @@
             border: 1px solid #e2ebf9;
         }
 
+        .typing-indicator {
+            color: #666;
+            font-style: italic;
+            padding: 10px 0;
+        }
+
         .thinking-steps {
             margin-bottom: 18px;
             border-left: 3px solid #799cd2;
@@ -737,36 +743,6 @@
     function renderAnswerCard(ans, container, questionText){
         const timeStr = new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
         container.innerHTML = `<div class="message-time">${timeStr}</div>`;
-        const stepsDiv = document.createElement('div'); stepsDiv.className='thinking-steps';
-        const titleRow = document.createElement('div');
-        titleRow.style.cssText = 'font-weight: 600; color: #1f4870; padding: 8px 18px; background: #edf4fe; border-radius: 18px; display: flex; justify-content: space-between; align-items: center; cursor: pointer;';
-        titleRow.innerHTML = '<span><i class="fas fa-chevron-down"></i> 思考过程</span><span id="toggleAllSteps" style="font-size: 12px; color: #3466a8;">展开</span>';
-        stepsDiv.appendChild(titleRow);
-        const stepsContent = document.createElement('div'); stepsContent.className='steps-content';
-        stepsContent.style.display = 'none';
-        stepsContent.innerHTML = `<div class="step"><div class="step-header" onclick="this.parentElement.classList.toggle('collapsed')">理解您的问题</div><div class="step-content">
-            <div style="margin-bottom:10px"><strong>您问：</strong>${ans.thinking.userQuestion}</div>
-            <div><strong>系统理解：</strong>${ans.thinking.systemUnderstanding}</div>
-        </div></div>
-        <div class="step"><div class="step-header" onclick="this.parentElement.classList.toggle('collapsed')">答案说明</div><div class="step-content">
-            <div>${ans.thinking.answerExplanation}</div>
-        </div></div>`;
-        stepsDiv.appendChild(stepsContent);
-        container.appendChild(stepsDiv);
-        
-        const toggleBtn = document.getElementById('toggleAllSteps');
-        let isExpanded = false;
-        const toggleSteps = () => {
-            isExpanded = !isExpanded;
-            stepsContent.style.display = isExpanded ? 'block' : 'none';
-            titleRow.querySelector('i').className = isExpanded ? 'fas fa-chevron-up' : 'fas fa-chevron-down';
-            toggleBtn.innerHTML = isExpanded ? '收起' : '展开';
-        };
-        toggleBtn.onclick = (e) => {
-            e.stopPropagation();
-            toggleSteps();
-        };
-        titleRow.onclick = toggleSteps;
         const titleDiv = document.createElement('div'); titleDiv.className='answer-text'; titleDiv.innerText=ans.title; container.appendChild(titleDiv);
         let contentElem;
         if(ans.type === 'table'){
@@ -787,7 +763,17 @@
             barDiv.innerHTML = `<div class="bar-chart">${ans.labels.map((l,i)=>`<div class="bar-item"><div class="bar" style="height:${Math.max(25,(ans.values[i]/maxVal)*80)}px"></div><div>${ans.values[i]}w</div><div>${l}</div></div>`).join('')}</div>`;
             contentElem=barDiv;
         } else {
-            let textDiv = document.createElement('div'); textDiv.innerText=ans.content; textDiv.style.padding='12px 0'; contentElem=textDiv;
+            let textDiv = document.createElement('div'); textDiv.style.padding='12px 0'; textDiv.style.minHeight='40px'; contentElem=textDiv;
+            let content = ans.content;
+            let index = 0;
+            let typingInterval = setInterval(() => {
+                if (index < content.length) {
+                    textDiv.innerText += content[index];
+                    index++;
+                } else {
+                    clearInterval(typingInterval);
+                }
+            }, 30);
         }
         container.appendChild(contentElem);
         let summary = document.createElement('div'); summary.style.cssText='font-size:13px; color:#4b6f94; margin-top:12px; border-top:1px solid #e2ecf8; padding-top:10px'; summary.innerText = `数据截止 2026/5/31 | 内容由AI生成，请核对`; container.appendChild(summary);
@@ -847,13 +833,22 @@
         userDiv.innerHTML = `<div class="message-time">${timeStr}</div><div class="user-message">${escapeHtml(question)}<div class="copy-question-icon" onclick="event.stopPropagation(); navigator.clipboard.writeText('${escapeHtml(question)}'); showToast('已复制问题');"><i class="far fa-copy"></i> 复制</div></div>`;
         flow.appendChild(userDiv);
         const botDiv = document.createElement('div'); botDiv.className='bot-response';
-        botDiv.innerHTML = `<div class="message-time">${timeStr}</div>`;
+        botDiv.innerHTML = `<div class="message-time">${timeStr}</div><div class="typing-indicator">好的，正在帮您查询【${escapeHtml(question)}】，请稍等...</div>`;
         flow.appendChild(botDiv);
-        const ans = generateFullAnswer(question);
-        renderAnswerCard(ans, botDiv, question);
         flow.scrollTop = flow.scrollHeight;
-        currentActive = question;
-        renderHistory();
+        
+        setTimeout(() => {
+            botDiv.querySelector('.typing-indicator').innerHTML = '正在查询数据...';
+        }, 500);
+        
+        setTimeout(() => {
+            const ans = generateFullAnswer(question);
+            botDiv.innerHTML = `<div class="message-time">${timeStr}</div>`;
+            renderAnswerCard(ans, botDiv, question);
+            flow.scrollTop = flow.scrollHeight;
+            currentActive = question;
+            renderHistory();
+        }, 1500);
     }
 
     function handleSuggestionClick(suggestion){
